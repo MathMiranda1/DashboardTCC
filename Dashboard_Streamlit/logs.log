@@ -1,0 +1,150 @@
+2025-07-15 17:28:54,884:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-15 17:28:54,884:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-15 17:28:54,884:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-15 17:28:54,884:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-15 17:28:57,844:INFO:Initializing load_model()
+2025-07-15 17:28:57,844:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-15 17:30:22,093:INFO:Initializing predict_model()
+2025-07-15 17:30:22,095:INFO:predict_model(self=<pycaret.classification.oop.ClassificationExperiment object at 0x000001D22FBF0210>, estimator=Pipeline(memory=Memory(location=None),
+         steps=[('numerical_imputer',
+                 TransformerWrapper(include=['Semestre de Ingresso',
+                                             'Como é o seu deslocamento até a '
+                                             'universidade?',
+                                             'Com relação ao transporte do '
+                                             'item anterior, ele é:',
+                                             'O transporte representa uma '
+                                             'barreira/dificuldade para '
+                                             'frequentar a universidade?',
+                                             'Você mora em Angicos?',
+                                             'Você se identifica com o curso '
+                                             'que está fazendo?',...
+                                             'Cite as principais dificuldades '
+                                             'para sua permanência no Curso'],
+                                    transformer=TargetEncoder(cols=['Carimbo '
+                                                                    'de '
+                                                                    'data/hora',
+                                                                    'Cite as '
+                                                                    'principais '
+                                                                    'dificuldades '
+                                                                    'para sua '
+                                                                    'permanência '
+                                                                    'no Curso'],
+                                                              handle_missing='return_nan'))),
+                ('clean_column_names',
+                 TransformerWrapper(transformer=CleanColumnNames())),
+                ('actual_estimator',
+                 LogisticRegression(max_iter=1000, random_state=123))]), probability_threshold=None, encoded_labels=False, raw_score=False, round=4, verbose=True, ml_usecase=None, preprocess=True, encode_labels=<function _SupervisedExperiment.predict_model.<locals>.encode_labels at 0x000001D255D33880>)
+2025-07-15 17:30:22,097:INFO:Checking exceptions
+2025-07-15 17:30:22,097:INFO:Preloading libraries
+2025-07-15 17:30:22,110:INFO:Set up data.
+2025-07-15 17:30:22,164:INFO:Set up index.
+2025-07-15 17:32:45,114:INFO:Initializing predict_model()
+2025-07-15 17:32:45,115:INFO:predict_model(self=<pycaret.classification.oop.ClassificationExperiment object at 0x000001D255EC7790>, estimator=Pipeline(memory=Memory(location=None),
+         steps=[('numerical_imputer',
+                 TransformerWrapper(include=['Semestre de Ingresso',
+                                             'Como é o seu deslocamento até a '
+                                             'universidade?',
+                                             'Com relação ao transporte do '
+                                             'item anterior, ele é:',
+                                             'O transporte representa uma '
+                                             'barreira/dificuldade para '
+                                             'frequentar a universidade?',
+                                             'Você mora em Angicos?',
+                                             'Você se identifica com o curso '
+                                             'que está fazendo?',...
+                                             'Cite as principais dificuldades '
+                                             'para sua permanência no Curso'],
+                                    transformer=TargetEncoder(cols=['Carimbo '
+                                                                    'de '
+                                                                    'data/hora',
+                                                                    'Cite as '
+                                                                    'principais '
+                                                                    'dificuldades '
+                                                                    'para sua '
+                                                                    'permanência '
+                                                                    'no Curso'],
+                                                              handle_missing='return_nan'))),
+                ('clean_column_names',
+                 TransformerWrapper(transformer=CleanColumnNames())),
+                ('actual_estimator',
+                 LogisticRegression(max_iter=1000, random_state=123))]), probability_threshold=None, encoded_labels=False, raw_score=False, round=4, verbose=True, ml_usecase=None, preprocess=True, encode_labels=<function _SupervisedExperiment.predict_model.<locals>.encode_labels at 0x000001D255D7BA60>)
+2025-07-15 17:32:45,117:INFO:Checking exceptions
+2025-07-15 17:32:45,118:INFO:Preloading libraries
+2025-07-15 17:32:45,120:INFO:Set up data.
+2025-07-15 17:32:45,175:INFO:Set up index.
+2025-07-15 17:38:09,527:INFO:Initializing load_model()
+2025-07-15 17:38:09,528:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-15 17:44:18,450:INFO:Initializing load_model()
+2025-07-15 17:44:18,450:INFO:load_model(model_name=modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-15 17:44:47,230:INFO:Initializing load_model()
+2025-07-15 17:44:47,230:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-15 17:45:01,539:INFO:Initializing predict_model()
+2025-07-15 17:45:01,540:INFO:predict_model(self=<pycaret.classification.oop.ClassificationExperiment object at 0x000001D255EE4D10>, estimator=Pipeline(memory=Memory(location=None),
+         steps=[('numerical_imputer',
+                 TransformerWrapper(include=['Semestre de Ingresso',
+                                             'Como é o seu deslocamento até a '
+                                             'universidade?',
+                                             'Com relação ao transporte do '
+                                             'item anterior, ele é:',
+                                             'O transporte representa uma '
+                                             'barreira/dificuldade para '
+                                             'frequentar a universidade?',
+                                             'Você mora em Angicos?',
+                                             'Você se identifica com o curso '
+                                             'que está fazendo?',...
+                                             'Cite as principais dificuldades '
+                                             'para sua permanência no Curso'],
+                                    transformer=TargetEncoder(cols=['Carimbo '
+                                                                    'de '
+                                                                    'data/hora',
+                                                                    'Cite as '
+                                                                    'principais '
+                                                                    'dificuldades '
+                                                                    'para sua '
+                                                                    'permanência '
+                                                                    'no Curso'],
+                                                              handle_missing='return_nan'))),
+                ('clean_column_names',
+                 TransformerWrapper(transformer=CleanColumnNames())),
+                ('actual_estimator',
+                 LogisticRegression(max_iter=1000, random_state=123))]), probability_threshold=None, encoded_labels=False, raw_score=False, round=4, verbose=True, ml_usecase=None, preprocess=True, encode_labels=<function _SupervisedExperiment.predict_model.<locals>.encode_labels at 0x000001D256560FE0>)
+2025-07-15 17:45:01,540:INFO:Checking exceptions
+2025-07-15 17:45:01,540:INFO:Preloading libraries
+2025-07-15 17:45:01,541:INFO:Set up data.
+2025-07-15 17:45:01,549:INFO:Set up index.
+2025-07-15 17:47:42,203:INFO:Initializing load_model()
+2025-07-15 17:47:42,204:INFO:load_model(model_name=modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-15 17:48:02,986:INFO:Initializing load_model()
+2025-07-15 17:48:02,987:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-18 10:10:06,122:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:10:06,122:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:10:06,122:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:10:06,122:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:10:12,622:INFO:Initializing load_model()
+2025-07-18 10:10:12,623:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-18 10:17:02,326:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:17:02,327:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:17:02,327:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:17:02,327:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-07-18 10:17:05,692:INFO:Initializing load_model()
+2025-07-18 10:17:05,693:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-18 10:23:25,140:INFO:Initializing load_model()
+2025-07-18 10:23:25,140:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-18 10:35:02,016:INFO:Initializing load_model()
+2025-07-18 10:35:02,017:INFO:load_model(model_name=modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-18 10:35:40,340:INFO:Initializing load_model()
+2025-07-18 10:35:40,341:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-07-18 10:44:42,719:INFO:Initializing load_model()
+2025-07-18 10:44:42,719:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)

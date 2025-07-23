@@ -1,0 +1,81 @@
+Carimbo de data/hora,Curso,Semestre de Ingresso,Como é o seu deslocamento até a universidade?,"Com relação ao transporte do item anterior, ele é:",O transporte representa uma barreira/dificuldade para frequentar a universidade?,Você mora em Angicos?,"Quanto tempo, em média, você demora para se deslocar todos os dias até o campus (Ida e volta)  Ex: 20min, 1h12min?",Você se identifica com o curso que está fazendo?,Como você considera a acessibilidade do Campus?,Em relação ao tempo necessário como discente para dedicar no estudo?,Você trabalha?,"Se você trabalha, em quais horários?",É casado(a)/está em união estável?,Tem filhos?,Você contribui para o sustento financeiro da família?,Cite as principais dificuldades para sua permanência no Curso,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Aparência,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Condição financeira,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Cor de pele,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Curso,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Deficiência,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Dificuldade de aprendizado,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Gênero,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Não,Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_idade,"Já pensou em trancar disciplinas, período ou abandonar o curso? Se sim, por que?",prediction_label,prediction_score
+05/10/2023 15:09:20,,13.0,2,3,0,2,90,0,0,0,6,4,0,0,0,Nenhuma,False,False,False,False,False,False,False,False,False,1,1,1.0
+29/09/2023 13:45:26,Pedagogia,11.0,2,1,1,0,90,0,0,0,1,1,1,1,1,"tempo de estudos e ler o textos suficientes, imprevistos",False,False,False,False,False,False,False,False,False,1,1,1.0
+26/09/2023 14:58:12,Licenciatura em Computação e Informática,7.0,2,3,1,1,40,0,0,0,0,0,0,0,0,não tenho dificuldades para a permanencia,False,False,False,False,False,False,False,True,False,1,1,0.9975
+02/10/2023 14:56:01,Pedagogia,9.0,2,1,2,0,60,0,0,0,1,0,0,0,1,não tenho dificuldades para minha permanência,False,False,False,False,False,False,False,False,False,1,1,1.0
+26/09/2023 15:37:24,Ciência e Tecnologia,5.0,2,3,2,2,20,0,0,0,0,0,0,0,0,transporte,False,False,False,False,False,False,False,False,True,0,0,1.0
+26/09/2023 15:27:43,Pedagogia,10.0,2,1,2,2,60,1,0,1,3,2,0,0,1,não tem todas as matérias no horário da noite,False,False,False,False,False,False,False,False,False,1,1,1.0
+27/09/2023 10:33:18,Ciência e Tecnologia,5.0,2,3,2,2,30,0,3,2,5,4,0,0,1,falta de tempo,False,False,False,False,False,False,False,True,False,0,0,0.9953
+27/09/2023 13:55:58,Engenharia Civil,7.0,2,3,1,2,30,0,3,0,4,1,0,0,1,a dificuldade dos horarios do curso pois não são bem elaborados,False,False,False,False,False,False,False,True,False,0,0,0.9837
+26/09/2023 15:22:29,Ciência e Tecnologia,6.0,2,1,2,2,30,0,0,1,0,0,0,0,0,dificuldade em compreender certas disciplinas,False,False,False,False,False,False,False,True,False,0,0,0.9873
+02/10/2023 14:36:05,Pedagogia,8.0,2,1,2,0,60,1,2,1,3,1,0,0,1,os custos de morar fora,False,False,False,False,False,False,False,True,False,1,1,1.0
+27/09/2023 12:37:16,Engenharia Civil,7.0,2,1,0,2,40,1,0,1,1,1,0,0,0,devido eu não ter tido um bom ensino basico tenho dificuldades.,False,False,False,False,False,False,False,True,False,1,1,0.9966
+05/10/2023 14:25:06,Ciência e Tecnologia,3.0,2,3,2,2,20,1,0,1,0,0,0,0,0,As disciplinas e condições financeiras,False,False,False,False,False,True,False,False,False,0,0,1.0
+26/09/2023 12:20:12,Sistema de Informação,,2,1,0,0,150,1,0,0,0,0,0,0,0,não sou de exatas,False,False,False,False,False,False,False,False,False,1,1,1.0
+27/09/2023 13:29:18,Ciência e Tecnologia,3.0,2,1,0,2,10,1,0,0,0,0,0,0,0,o medo da minha falta de identificação com o curso atrapalhar meus planos futuros,False,False,False,True,False,False,False,False,False,0,0,1.0
+28/09/2023 11:27:42,Ciência e Tecnologia,5.0,2,1,2,2,30,0,2,2,3,1,0,0,0,transporte,False,False,False,False,False,False,False,True,False,0,0,0.9926
+27/09/2023 12:48:56,,,2,1,3,2,120,0,0,0,6,4,1,1,3,"conciliar o curso com o trabalho, mas não será motivo pra desistir!",False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 11:25:04,Ciência e Tecnologia,5.0,2,1,2,2,30,1,2,2,3,1,0,0,0,transporte,False,False,False,False,False,False,False,True,False,0,0,0.9929
+27/09/2023 10:28:26,Ciência e Tecnologia,5.0,2,3,2,2,25,0,3,2,0,0,0,0,0,.,False,False,False,False,False,False,False,True,False,0,0,0.9999
+28/09/2023 14:49:45,Pedagogia,8.0,2,1,0,0,60,0,0,1,1,1,0,0,1,não tenho,False,False,False,False,False,False,False,True,False,1,1,1.0
+28/09/2023 14:23:58,Pedagogia,12.0,2,1,2,2,90,0,0,1,5,2,0,0,1,Lembrar dos conteúdos,False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 14:52:13,Pedagogia,10.0,2,1,1,0,80,0,2,0,1,0,0,0,0,.,False,False,False,False,False,False,False,False,False,1,1,1.0
+27/09/2023 14:03:56,Pedagogia,11.0,2,1,0,0,80,0,3,1,0,0,0,0,0,distância da minha cidade para cá e também de me manter na cidade sem nenhuma bolsa,False,False,False,False,False,False,False,False,False,1,1,1.0
+11/09/2023 20:03:18,Ciência e Tecnologia,3.0,2,1,0,2,20,0,0,0,5,1,0,0,1,Não tenho,False,False,False,False,False,True,False,False,False,0,0,1.0
+02/10/2023 15:39:19,Licenciatura em Computação e Informática,7.0,2,1,0,0,40,0,2,0,3,0,0,0,0,saudades da família,False,False,False,False,False,False,False,True,False,1,1,0.9977
+28/09/2023 10:38:10,Ciência e Tecnologia,5.0,2,1,0,1,20,0,0,1,0,0,0,0,0,nenhuma dificuldade no momento,False,False,False,False,False,True,False,False,False,0,0,1.0
+26/09/2023 11:08:32,Pedagogia,12.0,2,1,1,2,90,0,0,1,0,0,1,1,1,dificuldade de aprendizado,False,False,False,False,False,False,False,False,False,1,1,1.0
+26/09/2023 12:07:54,Ciência e Tecnologia,7.0,1,0,1,1,30,0,0,1,0,0,0,0,0,spmente a distância entre a cidade que eu sou e angicos,False,False,False,False,False,False,False,True,False,0,0,0.9807
+05/10/2023 10:34:36,Ciência e Tecnologia,3.0,2,1,2,2,20,0,0,1,0,0,0,0,0,o deslocameto da minha cidade,False,False,False,False,False,True,False,False,False,0,0,1.0
+27/09/2023 13:26:36,Ciência e Tecnologia,3.0,2,1,0,0,10,0,0,0,5,0,0,0,0,até o momento nenhuma,False,False,False,True,False,False,False,False,False,0,0,1.0
+02/10/2023 15:22:06,Sistema de Informação,,2,1,2,2,180,0,3,0,3,1,0,0,1,.,False,False,False,False,False,False,False,False,False,1,1,1.0
+22/09/2023 05:45:09,,13.0,2,1,2,1,90,1,2,0,0,0,0,0,0,"deducação e falta motivação, não sei se eu quero isso pra mim",False,False,False,False,False,False,False,False,False,1,1,1.0
+04/10/2023 21:41:31,Ciência e Tecnologia,3.0,2,1,1,0,20,0,0,1,0,0,1,1,0,"""A principal dificuldade é não ter com quem deixar meus filhos para vir à faculdade.""",False,False,False,False,True,False,False,False,False,0,0,1.0
+27/09/2023 13:30:35,Ciência e Tecnologia,5.0,2,3,0,2,25,0,0,0,0,0,0,0,0,muita pressão,False,False,False,False,False,False,False,True,False,0,0,0.9999
+26/09/2023 10:53:40,,,2,1,0,0,120,0,0,0,0,0,0,0,0,"estou tendo dificuldade em calculo 1 e em conseguir prestar atenção em analise e expressão textual, mas nao penso nisso como algo que faria eu largar ou trancar a universidade.",False,False,False,False,False,False,False,False,False,1,1,1.0
+26/09/2023 12:16:57,Sistema de Informação,,2,1,0,0,180,0,0,0,0,0,0,0,0,não tenho dificuldades,False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 14:28:52,Ciência e Tecnologia,7.0,0,0,0,0,30,0,0,3,6,4,0,1,2,tenho dois empregos,False,False,False,False,False,False,False,True,False,0,0,0.9961
+26/09/2023 12:27:58,Sistema de Informação,,2,1,2,2,150,1,2,0,0,0,0,0,1,.,False,False,False,False,False,False,False,False,False,1,1,1.0
+05/10/2023 14:08:15,Ciência e Tecnologia,3.0,2,3,3,2,20,0,0,0,0,0,0,0,0,Falta de estagio/trabalho de meio periodo e que seja acessivel,False,False,False,False,False,True,False,False,False,0,0,1.0
+02/10/2023 14:44:48,Pedagogia,9.0,1,0,1,0,60,0,0,0,1,1,0,0,2,Em especial é o custo de vida que as vezes o valor da bolsa não suporta todas as despesas,False,False,False,False,False,False,False,True,False,1,1,1.0
+27/09/2023 12:33:31,Ciência e Tecnologia,5.0,2,1,0,0,30,1,0,0,1,1,0,0,0,"problemas psicologicos desenvolvidos pelas materias mais complicadas do curso(ansiedade, crise de pânico)",False,False,False,False,False,False,False,True,False,0,0,0.9869
+02/10/2023 15:18:29,Pedagogia,9.0,2,1,1,2,60,0,2,1,3,1,0,0,1,"chegar cedo na universidade, conciliar a rotina de um estudo de qualidade com a necessidade de exercer alguma atividade remunerada, ansiedade devido essas questões por não conseguir gerir bem o tempo",False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 14:08:51,Ciência e Tecnologia,4.0,2,1,2,2,20,0,0,1,6,2,0,0,1,uma dificuldade é associar o curso com o trabalho,False,False,False,False,False,True,False,False,False,0,0,1.0
+27/09/2023 13:00:04,Ciência e Tecnologia,3.0,2,1,2,2,15,0,2,2,0,0,0,0,0,o horario e a distancia,False,False,False,True,False,False,False,False,False,0,0,1.0
+28/09/2023 10:53:01,Ciência e Tecnologia,5.0,2,1,1,2,30,0,0,0,0,0,1,1,0,.,False,False,False,False,False,False,False,True,False,0,0,0.9874
+26/09/2023 12:26:38,Ciência e Tecnologia,3.0,2,1,1,2,20,0,0,0,1,0,0,0,0,condições financeiras,False,False,False,False,True,False,False,False,False,0,0,1.0
+02/10/2023 14:57:34,Pedagogia,9.0,2,1,0,0,60,0,2,0,1,0,0,0,1,em relação a recursos financeiros,False,False,False,False,False,False,False,False,False,1,1,1.0
+04/10/2023 21:32:09,,,2,1,2,1,120,0,0,0,0,0,0,0,0,"""Dificuldade em algumas disciplinas.""",False,False,False,False,False,False,False,False,False,1,1,1.0
+29/09/2023 13:42:06,Pedagogia,11.0,2,1,2,0,90,0,2,1,6,1,1,1,1,"consiliar trabalho, casa, filho e estudo",False,False,False,False,False,False,False,False,False,1,1,1.0
+27/09/2023 12:40:56,Ciência e Tecnologia,6.0,2,1,1,2,30,1,0,2,2,1,0,0,0,Algumas matérias que não tive um bom desempenho no ensino medio,False,False,False,False,False,False,False,True,False,0,0,0.9924
+28/09/2023 11:09:08,Ciência e Tecnologia,5.0,2,1,1,2,30,0,0,1,3,1,0,0,0,.,False,False,False,False,False,False,False,True,False,0,0,0.9941
+26/09/2023 15:03:42,Licenciatura em Computação e Informática,7.0,2,1,2,2,40,0,0,0,1,0,0,0,0,só o transporte que tenho a noite me faz com que atrase nas disciplinas,False,False,False,False,False,False,False,True,False,1,1,0.9964
+27/09/2023 13:09:39,Ciência e Tecnologia,6.0,1,0,0,0,30,1,0,0,4,4,0,0,1,o aprendizado das matérias,False,False,False,False,False,False,False,True,False,0,0,0.9928
+27/09/2023 14:07:00,Ciência e Tecnologia,5.0,1,2,3,1,20,0,0,1,4,0,0,0,0,sustento financeiro e transporte para ir a faculdade,False,False,False,False,False,True,False,False,False,0,0,1.0
+26/09/2023 12:02:17,Ciência e Tecnologia,3.0,2,3,1,2,5,0,0,0,0,0,0,0,0,a distancia,True,False,False,False,False,False,False,False,False,0,0,1.0
+26/09/2023 12:15:46,Ciência e Tecnologia,3.0,1,0,0,0,4,0,0,2,6,4,1,1,2,disponibilidade de tempo,True,False,False,False,False,False,False,False,False,0,0,1.0
+26/09/2023 12:04:15,,,2,1,1,0,120,0,0,0,1,0,0,0,0,financeira,False,False,False,False,False,False,False,False,False,1,1,1.0
+26/09/2023 11:11:11,,,2,3,0,2,120,0,0,0,0,0,0,0,0,.,False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 14:04:38,Ciência e Tecnologia,5.0,1,0,0,1,20,0,0,3,2,2,0,0,1,tempo para consciliar o trabalho,False,False,False,False,False,True,False,False,False,0,0,1.0
+26/09/2023 11:13:07,Sistema de Informação,,2,1,2,2,240,1,2,1,1,0,0,0,1,"rptina exaustiva, situações financeiras, meus problemas psicologicos.",False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 11:16:17,Sistema de Informação,,2,3,2,2,240,0,1,0,3,1,0,0,1,situações enfrentadas no meu cotidiano,False,False,False,False,False,False,False,False,False,1,1,1.0
+27/09/2023 13:21:14,Ciência e Tecnologia,3.0,2,1,2,2,10,2,0,1,4,1,1,0,1,a locomoção para a ufersa e o tempo da minha rotina que tenho que dedicar aos estudos,False,False,False,True,False,False,False,False,False,0,0,1.0
+02/10/2023 15:30:29,Licenciatura em Computação e Informática,7.0,2,3,0,2,40,0,2,1,3,4,0,0,2,desvalorização das pessoas,False,False,False,False,False,False,False,True,False,1,1,0.9955
+26/09/2023 12:11:25,,,2,1,0,0,120,0,0,1,0,0,0,0,0,ate o momento não ha dificuldades para permanecer no curso,False,False,False,False,False,False,False,False,False,1,1,1.0
+22/09/2023 05:46:43,Pedagogia,9.0,2,1,0,0,60,0,0,0,0,0,0,0,0,.,False,False,False,False,False,False,False,False,False,1,1,1.0
+29/09/2023 13:35:34,Pedagogia,11.0,2,1,0,0,80,1,3,1,1,0,0,0,0,grande demanada de atividades e dificuldade de aprendizagem,False,False,False,False,False,False,False,False,False,1,1,1.0
+29/09/2023 14:03:54,Pedagogia,9.0,2,1,2,0,60,0,0,1,2,2,0,0,1,"trabalha e estudar, pois, torna-se bastante cansativo e não consigo me dedicar como gostaria aos estudos e demais atividades",False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 11:30:50,Ciência e Tecnologia,5.0,2,1,0,0,30,0,2,1,0,0,0,0,1,não tenho,False,False,False,False,False,False,False,True,False,0,0,0.9767
+22/09/2023 05:42:24,Pedagogia,13.0,0,2,2,0,90,1,3,2,0,0,1,1,1,ansiedade e falta de estimulo,False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 10:35:17,Licenciatura em Computação e Informática,7.0,2,1,1,0,40,1,3,1,0,0,0,0,0,"financeiro, dificuldades psicologicas, não tive um bom ensino médio em exatas",False,False,False,False,False,False,False,True,False,1,1,0.9987
+28/09/2023 11:17:49,Ciência e Tecnologia,5.0,2,1,2,2,30,0,0,1,6,4,0,0,1,não tenho dificuldades para pernecer no curso,False,False,False,False,False,False,False,True,False,0,0,0.9977
+27/09/2023 13:36:32,Ciência e Tecnologia,3.0,2,1,1,0,10,0,0,2,6,2,0,0,3,o tempo para dedicar aos estudos e o trabalho que pega a maioria do meu tempo,False,False,True,False,False,False,False,False,False,0,0,1.0
+27/09/2023 13:48:56,Sistema de Informação,,2,1,2,2,240,2,0,1,4,1,0,0,0,"entrei nele por conta dos meus pais, porém pretendo alcançar grandes resultados em minha vida através do empreendedorismo, negócios...",False,False,False,False,False,False,False,False,False,1,1,1.0
+27/09/2023 13:59:52,Pedagogia,9.0,2,1,0,0,60,0,0,0,0,0,0,0,0,.,False,False,False,False,False,False,False,True,False,1,1,1.0
+28/09/2023 14:00:53,,,2,2,2,2,120,1,2,2,3,1,0,0,1,materias de mais e muito pouco tempo,False,False,False,False,False,False,False,False,False,1,1,1.0
+28/09/2023 14:48:24,Pedagogia,10.0,2,3,3,2,75,1,2,2,3,2,0,0,1,materia de calculo,False,False,False,False,False,False,False,False,False,1,1,1.0
+02/10/2023 15:38:02,Licenciatura em Computação e Informática,7.0,2,1,2,2,50,0,2,1,3,1,0,0,0,.,False,False,False,False,False,False,False,True,False,1,1,1.0
+26/09/2023 14:54:42,,14.0,2,3,2,2,120,0,0,1,0,0,0,0,0,transporte,False,False,False,False,False,False,False,False,False,1,1,1.0
+02/10/2023 15:09:01,Ciência e Tecnologia,7.0,1,0,0,0,30,0,3,1,1,1,1,0,2,sinto dificuldades em relação a apresentação dee seminários e em construção de artigos,False,False,False,False,False,False,False,True,False,0,0,0.9689
+28/09/2023 11:10:44,,,2,1,1,0,120,0,0,1,0,0,1,0,0,"algumas dificuldades financeiras, mas nada que impeça a conclusão do curso",False,False,False,False,False,False,False,False,False,1,1,1.0
+26/09/2023 10:49:58,Sistema de Informação,,2,2,1,0,150,1,3,2,0,0,0,0,1,uma das dificuldades é um assunto complexo pois é muito dificil,False,False,False,False,False,False,False,False,False,1,1,1.0
