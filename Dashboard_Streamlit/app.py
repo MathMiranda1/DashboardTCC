@@ -51,13 +51,49 @@ with st.form(key='formulario_evasao'):
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        curso = st.selectbox("**Curso:**", 
-            ['Ciência e Tecnologia', 'Engenharia Civil', 'Sistema de Informação', 
-             'Licenciatura em Computação e Informática', 'Pedagogia'])
+        # Mapeamento: Frontend (Área de Conhecimento) → Modelo (Curso Específico)
+        areas_cursos = {
+            "Ciências Exatas e da Terra": "Ciência e Tecnologia",
+            "Engenharias": "Engenharia Civil", 
+            "Ciências Humanas": "Pedagogia",
+            "Ciências Sociais Aplicadas": "Licenciatura em Computação e Informática",
+            "Tecnologia da Informação": "Sistema de Informação",
+            "Outro/Não informado": ""
+        }
+        
+        area_selecionada = st.selectbox("**Área de Conhecimento:**", 
+            list(areas_cursos.keys()))
+        
+        # Converter área selecionada para curso específico que o modelo entende
+        curso = areas_cursos[area_selecionada]
+        
     with col2:
-        semestre_ingresso = st.number_input("**Semestre de Ingresso:**", min_value=1.0, max_value=20.0, value=1.0, step=1.0)
+        semestre_ingresso_texto = st.text_input("**Semestre de Ingresso:**", 
+            value="2025.1",
+            placeholder="Ex: 2025.1, 2024.2",
+            help="Digite no formato YYYY.1 ou YYYY.2")
+        
+        # Converter para número mantendo compatibilidade com o modelo
+        try:
+            if '.' in semestre_ingresso_texto:
+                ano, periodo = semestre_ingresso_texto.split('.')
+                ano, periodo = int(ano), int(periodo)
+                if periodo in [1, 2] and 2010 <= ano <= 2030:
+                    # Converter para sequência numérica começando de 2010 (2010.1 = 1, 2010.2 = 2, etc.)
+                    semestre_ingresso = ((ano - 2010) * 2) + periodo
+                else:
+                    st.warning("⚠️ Use formato YYYY.1 ou YYYY.2 (anos entre 2010-2030)")
+                    semestre_ingresso = 31.0  # 2025.1 com nova base
+            else:
+                # Se digitou só número, usar como está
+                semestre_ingresso = float(semestre_ingresso_texto)
+        except:
+            # Se houver erro na conversão, mostrar aviso e usar valor padrão
+            st.warning("⚠️ Formato inválido. Usando 2025.1 como padrão.")
+            semestre_ingresso = 31.0  # 2025.1 com nova base
+            
     with col3:
-        identificacao_curso = st.selectbox("**7. Você se identifica com o curso?**",
+        identificacao_curso = st.selectbox("**7. Você se identifica com a área de conhecimento do seu curso?**",
             ('Sim', 'Não, mas quero concluir', 'Não, não sei se concluirei'))
 
     # TRANSPORTE E LOGÍSTICA
@@ -75,8 +111,8 @@ with st.form(key='formulario_evasao'):
         barreira_transporte = st.selectbox("**3. O transporte representa uma barreira/dificuldade para frequentar a universidade?**",
             ['Sim, sempre', 'Sim, às vezes', 'Não, mas já foi', 'Não, nunca foi'])
         
-        mora_angicos = st.selectbox("**4. Você mora em Angicos?**",
-            ('Sim', 'Não', 'Durmo em Angicos nos dias de aula e atividades'))
+        mora_angicos = st.selectbox("**4. Você mora na cidade onde estuda?**",
+            ('Sim', 'Não', 'Durmo nos dias de aula e atividades'))
     
     with col3:
         tempo_deslocamento = st.text_input("**5. Quanto tempo você demora para se deslocar até o campus (ida e volta)?**",
@@ -211,7 +247,7 @@ if submit_button:
     # Criação do DataFrame
     data = pd.DataFrame([{
         'Carimbo de data/hora': datetime.now(),
-        'Curso': curso,
+        'Curso': curso,  # Já convertido do mapeamento área → curso
         'Semestre de Ingresso': semestre_ingresso,
         'Como é o seu deslocamento até a universidade?': ['Carro', 'Moto', 'Ônibus', 'A pé', 'Outro'].index(tipo_transporte),
         'Com relação ao transporte do item anterior, ele é:': ['Próprio', 'Cedido', 'Público(gratuito)', 'Particular(táxi/moto-táxi)', 'Não se aplica'].index(propriedade_transporte),
@@ -320,7 +356,7 @@ if submit_button:
         if barreira_transporte in ['Sim, sempre', 'Sim, às vezes']:
             fatores_risco.append("Dificuldades de transporte")
         if identificacao_curso != 'Sim':
-            fatores_risco.append("Baixa identificação com o curso")
+            fatores_risco.append("Baixa identificação com a área de conhecimento do curso")
         if tempo_estudo in ['É insuficiente e não consigo realizar as atividades obrigatórias', 
                            'É insuficiente, mas só realizo as atividades obrigatórias']:
             fatores_risco.append("Tempo insuficiente para estudos")
@@ -349,6 +385,11 @@ if submit_button:
             st.write(f"- Texto original: '{ja_pensou_evasao}'")
             st.write(f"- Análise automática: {'SIM' if pensou_evasao else 'NÃO'} pensou em evasão")
             st.write(f"- Target numérico: {target_value}")
+            st.write("**Conversões realizadas:**")
+            st.write(f"- Área selecionada: '{area_selecionada}'")
+            st.write(f"- Curso enviado ao modelo: '{curso}'")
+            st.write(f"- Semestre digitado: '{semestre_ingresso_texto}'")
+            st.write(f"- Valor numérico enviado ao modelo: {semestre_ingresso}")
             st.write("**Colunas enviadas:**", data.columns.tolist())
             st.write("**Dados:**", data)
             

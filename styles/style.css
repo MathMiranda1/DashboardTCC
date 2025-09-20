@@ -238,17 +238,6 @@ label {
     display: none;
 }
 
-#MainMenu {
-    visibility: hidden;
-}
-
-footer {
-    visibility: hidden;
-}
-
-header {
-    visibility: hidden;
-}
 
 /* ===== DIVISORES ===== */
 hr {
