@@ -2,9 +2,10 @@ import streamlit as st
 import database as db
 from pages.homepage import show_homepage
 from pages.auth import show_admin_login, safe_logout
-from pages.predicao_hibrida_streamlit import pagina_predicao_hibrida
+from pages.prediction import show_prediction_form  # ← USA SEU ARQUIVO ATUAL
 from pages.dashboard import show_admin_dashboard
 from utils.styles import load_css
+from utils.model_utils import carregar_modelo
 
 # Configuração da página
 st.set_page_config(
@@ -27,6 +28,9 @@ else:
     st.error("❌ Falha na conexão com o banco de dados.")
     st.stop()
 
+# Carregar modelo (o prediction.py vai usar o modelo correto internamente)
+modelo = carregar_modelo()
+
 # Inicializar estado
 if "user_type" not in st.session_state:
     st.session_state.user_type = None
@@ -40,7 +44,7 @@ def main():
         show_admin_login()
 
     elif st.session_state.user_type == "student":
-        # ESTUDANTE - Mostrar sidebar mínima
+        # ESTUDANTE - Usar prediction.py (ML puro)
         with st.sidebar:
             st.write(f"👋 **{st.session_state.name}**")
             if st.button("🏠 Voltar ao Início", use_container_width=True):
@@ -50,26 +54,24 @@ def main():
                 st.session_state.username = None
                 st.rerun()
 
-        # Mostrar o sistema híbrido para estudantes
-        pagina_predicao_hibrida()
+        # Chama a função do prediction.py
+        show_prediction_form(modelo, engine)
 
     elif st.session_state.user_type == "admin":
-        # ADMINISTRADOR - Mostrar sidebar com navegação
+        # ADMINISTRADOR
         with st.sidebar:
             st.write(f"👋 **{st.session_state.name}**")
 
-            # Menu de navegação do admin
             page = st.radio(
                 "📍 Navegação:",
                 [
                     "📈 Dashboard Administrativo",
-                    "🎯 Sistema Híbrido",
+                    "🎯 Testar Predição",
                 ],
             )
 
             st.markdown("---")
 
-            # Botões de ação
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("🏠 Início", use_container_width=True):
@@ -84,10 +86,10 @@ def main():
                     safe_logout()
                     st.rerun()
 
-        # Renderizar página selecionada
-        if page == "🎯 Sistema Híbrido":
-            pagina_predicao_hibrida()
-        else:  # Dashboard Administrativo
+        # Renderizar página
+        if page == "🎯 Testar Predição":
+            show_prediction_form(modelo, engine)
+        else:  # Dashboard
             show_admin_dashboard(engine)
 
 

@@ -8,44 +8,110 @@ import database as db
 
 
 @st.cache_resource
-def load_new_model():
-    """Carrega o modelo corrigido sem data leakage"""
+def load_corrected_model():
+    """Carrega o modelo CORRIGIDO com codificação consistente"""
     try:
-        with open("../models/modelo_evasao_SEM_vazamento.pkl", "rb") as f:
-            modelo_data = pickle.load(f)
-        return modelo_data
+        # Tentar carregar do diretório models
+        with open("../models/modelo_evasao_CORRIGIDO.pkl", "rb") as f:
+            modelo_completo = pickle.load(f)
     except FileNotFoundError:
         try:
-            with open("modelo_evasao_SEM_vazamento.pkl", "rb") as f:
-                modelo_data = pickle.load(f)
-            return modelo_data
+            # Tentar carregar do diretório atual
+            with open("modelo_evasao_CORRIGIDO.pkl", "rb") as f:
+                modelo_completo = pickle.load(f)
         except FileNotFoundError:
             st.error(
-                "❌ Modelo não encontrado! Execute o script de geração do modelo primeiro."
+                "❌ Modelo não encontrado! Execute o script de treinamento primeiro."
             )
             return None
-    except Exception as e:
-        st.error(f"❌ Erro ao carregar modelo: {e}")
-        return None
+
+    # Extrair componentes
+    modelo_data = {
+        "modelo": modelo_completo["modelo"],
+        "feature_names": modelo_completo["feature_names"],
+        "metricas": modelo_completo["metricas"],
+        "label_encoders": modelo_completo["preprocessors"].get("label_encoders", {}),
+        "imputer": modelo_completo["preprocessors"]["imputer"],
+        "scaler": modelo_completo["preprocessors"]["scaler"],
+        "metadata": modelo_completo.get("metadata", {}),
+    }
+
+    return modelo_data
 
 
-def preprocess_data_for_new_model(raw_data, model_data):
-    """Preprocessa dados usando o pipeline do novo modelo"""
+def codificar_resposta_evasao(resposta):
+    """
+    Codifica a resposta de evasão de forma CONSISTENTE com o treinamento
+
+    Retorna:
+        0 = NÃO pensou em evasão (baixo risco)
+        1 = SIM pensou em evasão (alto risco)
+    """
+    if not resposta or len(resposta.strip()) < 3:
+        return 0  # Resposta vazia = não pensou
+
+    resposta_lower = resposta.lower().strip()
+    inicio = resposta_lower[:30]  # Primeiras palavras são mais importantes
+
+    # Palavras que indicam SIM pensou em evasão
+    palavras_sim = [
+        "sim",
+        "já",
+        "pensei",
+        "pensando",
+        "vou",
+        "quero",
+        "pretendo",
+        "planejo",
+        "talvez",
+        "possivelmente",
+    ]
+
+    # Palavras que indicam NÃO pensou em evasão
+    palavras_nao = [
+        "não",
+        "nunca",
+        "jamais",
+        "feliz",
+        "gosto",
+        "adoro",
+        "amo",
+        "satisfeito",
+        "realizado",
+    ]
+
+    # Palavras de evasão forte
+    palavras_evasao = [
+        "trancar",
+        "abandonar",
+        "desistir",
+        "parar",
+        "sair",
+        "largar",
+        "deixar",
+    ]
+
+    # Prioridade 1: Início da resposta
+    if any(palavra in inicio for palavra in palavras_sim):
+        return 1
+    if any(palavra in inicio for palavra in palavras_nao):
+        return 0
+
+    # Prioridade 2: Palavras de evasão em qualquer lugar
+    if any(palavra in resposta_lower for palavra in palavras_evasao):
+        return 1
+
+    # Padrão: se não encontrou indicadores claros, assumir que não pensou
+    return 0
+
+
+def preprocess_input(raw_data, model_data):
+    """Preprocessa os dados de entrada usando o pipeline do modelo"""
     try:
-        # Criar DataFrame com os dados
+        # Criar DataFrame
         df = pd.DataFrame([raw_data])
 
-        # Aplicar label encoders para variáveis categóricas
-        for col, encoder in model_data["label_encoders"].items():
-            if col in df.columns:
-                if df[col].dtype == "object":
-                    try:
-                        df[col] = encoder.transform(df[col].astype(str))
-                    except ValueError:
-                        # Se valor não foi visto no treino, usar o mais frequente
-                        df[col] = encoder.transform([encoder.classes_[0]])[0]
-
-        # Garantir ordem correta das colunas
+        # Garantir ordem correta das features
         df = df.reindex(columns=model_data["feature_names"], fill_value=0)
 
         # Aplicar imputer
@@ -57,172 +123,134 @@ def preprocess_data_for_new_model(raw_data, model_data):
         df_scaled = model_data["scaler"].transform(df_imputed)
 
         return df_scaled
+
     except Exception as e:
         st.error(f"Erro no preprocessing: {e}")
+        import traceback
+
+        st.code(traceback.format_exc())
         return None
 
 
 def show_prediction_form(modelo_antigo, engine):
-    """Formulário de predição com campos originais, usando novo modelo"""
+    """Formulário principal com predição usando modelo corrigido"""
 
-    # Carregar o novo modelo (ignorar o antigo passado como parâmetro)
-    modelo_data = load_new_model()
+    # Carregar modelo corrigido
+    modelo_data = load_corrected_model()
     if modelo_data is None:
         return
 
-    # Info do modelo na sidebar
-    st.sidebar.success(
-        f"✅ Modelo carregado: AUC = {modelo_data['metricas']['auc_test']:.3f}"
-    )
-    st.sidebar.info("🔬 Modelo cientificamente validado (sem data leakage)")
+    # Informações do modelo
+    st.sidebar.success(f"✅ Modelo: AUC = {modelo_data['metricas']['test_auc']:.3f}")
+    st.sidebar.info("🔬 Modelo cientificamente validado")
+
+    if modelo_data.get("metadata"):
+        st.sidebar.caption(f"Labels: 0=Não pensou | 1=Pensou em evasão")
 
     st.title("🎓 Sistema de Análise de Risco de Evasão Universitária")
     st.markdown(
-        "Esta ferramenta utiliza um modelo preditivo para identificar estudantes com maior propensão a **pensar em trancar disciplinas, período ou abandonar o curso**."
+        "Esta ferramenta utiliza IA para identificar estudantes com maior propensão a **pensar em trancar disciplinas, período ou abandonar o curso**."
     )
 
     with st.form(key="formulario_evasao"):
 
-        # INFORMAÇÕES BÁSICAS
-        st.markdown(
-            '<div class="section-header">📋 Informações Básicas</div>',
-            unsafe_allow_html=True,
-        )
+        # ===== SEÇÃO 1: INFORMAÇÕES BÁSICAS =====
+        st.markdown("### 📋 Informações Básicas")
 
         col1, col2, col3 = st.columns(3)
         with col1:
-            # Mapeamento: Frontend (Área de Conhecimento) → Modelo (Curso Específico)
             areas_cursos = {
                 "Ciências Exatas e da Terra": "Ciência e Tecnologia",
                 "Engenharias": "Engenharia Civil",
                 "Ciências Humanas": "Pedagogia",
-                "Ciências Sociais Aplicadas": "Licenciatura em Computação e Informática",
+                "Ciências Sociais Aplicadas": "Licenciatura em Computação",
                 "Tecnologia da Informação": "Sistema de Informação",
-                "Outro/Não informado": "",
+                "Outro": "",
             }
-
-            area_selecionada = st.selectbox(
-                "**Área de Conhecimento:** *(apenas informativo)*",
-                list(areas_cursos.keys()),
-                help="Este campo é coletado mas não influencia a predição do modelo",
+            area = st.selectbox(
+                "Área de Conhecimento *(informativo)*", list(areas_cursos.keys())
             )
-
-            # Converter área selecionada para curso específico que o modelo entende
-            curso = areas_cursos[area_selecionada]
+            curso = areas_cursos[area]
 
         with col2:
-            semestre_ingresso_texto = st.text_input(
-                "**Semestre de Ingresso:** *(apenas informativo)*",
+            semestre_texto = st.text_input(
+                "Semestre de Ingresso *(informativo)*",
                 value="2025.1",
-                placeholder="Ex: 2025.1, 2024.2",
-                help="Campo coletado mas não usado na predição - Digite no formato YYYY.1 ou YYYY.2",
+                placeholder="Ex: 2025.1",
             )
-
-            # Converter para número mantendo compatibilidade com o banco de dados
-            try:
-                if "." in semestre_ingresso_texto:
-                    ano, periodo = semestre_ingresso_texto.split(".")
-                    ano, periodo = int(ano), int(periodo)
-                    if periodo in [1, 2] and 2010 <= ano <= 2030:
-                        # Converter para sequência numérica começando de 2010 (2010.1 = 1, 2010.2 = 2, etc.)
-                        semestre_ingresso = ((ano - 2010) * 2) + periodo
-                    else:
-                        st.warning(
-                            "⚠️ Use formato YYYY.1 ou YYYY.2 (anos entre 2010-2030)"
-                        )
-                        semestre_ingresso = 31.0  # 2025.1 com nova base
-                else:
-                    # Se digitou só número, usar como está
-                    semestre_ingresso = float(semestre_ingresso_texto)
-            except:
-                # Se houver erro na conversão, mostrar aviso e usar valor padrão
-                st.warning("⚠️ Formato inválido. Usando 2025.1 como padrão.")
-                semestre_ingresso = 31.0  # 2025.1 com nova base
 
         with col3:
             identificacao_curso = st.selectbox(
-                "**7. Você se identifica com a área de conhecimento do seu curso?**",
+                "**Você se identifica com o curso?**",
                 ("Sim", "Não, mas quero concluir", "Não, não sei se concluirei"),
             )
 
-        # TRANSPORTE E LOGÍSTICA
-        st.markdown(
-            '<div class="section-header">🚗 Transporte e Logística</div>',
-            unsafe_allow_html=True,
-        )
+        # ===== SEÇÃO 2: TRANSPORTE =====
+        st.markdown("### 🚗 Transporte e Logística")
 
         col1, col2, col3 = st.columns(3)
         with col1:
             tipo_transporte = st.selectbox(
-                "**1. Como é seu deslocamento até a universidade?**",
+                "**Como é seu deslocamento?**",
                 ["Carro", "Moto", "Ônibus", "A pé", "Outro"],
             )
 
-            propriedade_transporte = st.selectbox(
-                "**2. Com relação ao transporte do item anterior, ele é:**",
+            propriedade = st.selectbox(
+                "**O transporte é:**",
                 [
                     "Próprio",
                     "Cedido",
                     "Público(gratuito)",
-                    "Particular(táxi/moto-táxi)",
+                    "Particular(táxi)",
                     "Não se aplica",
                 ],
             )
 
         with col2:
-            barreira_transporte = st.selectbox(
-                "**3. O transporte representa uma barreira/dificuldade para frequentar a universidade?**",
+            barreira = st.selectbox(
+                "**O transporte é uma barreira?**",
                 ["Sim, sempre", "Sim, às vezes", "Não, mas já foi", "Não, nunca foi"],
             )
 
-            mora_angicos = st.selectbox(
-                "**4. Você mora na cidade onde estuda?**",
-                ("Sim", "Não", "Durmo nos dias de aula e atividades"),
+            mora_cidade = st.selectbox(
+                "**Mora na cidade onde estuda?**",
+                ("Sim", "Não", "Durmo nos dias de aula"),
             )
 
         with col3:
             tempo_deslocamento = st.text_input(
-                "**5. Quanto tempo você demora para se deslocar até o campus (ida e volta):** *(apenas informativo)*",
-                placeholder="Ex: 30min, 1h30min",
-                help="Esta informação é coletada mas não é usada pelo modelo",
+                "**Tempo de deslocamento *(informativo)*:**",
+                placeholder="Ex: 30min, 1h",
             )
 
             acessibilidade = st.selectbox(
-                "**8. Como você considera a acessibilidade do Campus?**",
+                "**Acessibilidade do campus:**",
                 ("Adequada", "Inadequada"),
             )
 
-        # EXPERIÊNCIAS NO CAMPUS
-        st.markdown(
-            '<div class="section-header">🏫 Experiências no Campus</div>',
-            unsafe_allow_html=True,
-        )
+        # ===== SEÇÃO 3: EXPERIÊNCIAS NO CAMPUS =====
+        st.markdown("### 🏫 Experiências no Campus")
+        st.markdown("**Sofreu algum preconceito/violência relativo a:**")
 
-        st.markdown(
-            "**6. Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:**"
-        )
         col1, col2, col3 = st.columns(3)
         with col1:
-            preconceito_cor = st.checkbox("Cor de pele")
-            preconceito_financeiro = st.checkbox("Condição financeira")
-            preconceito_aparencia = st.checkbox("Aparência")
+            prec_cor = st.checkbox("Cor de pele")
+            prec_financeiro = st.checkbox("Condição financeira")
+            prec_aparencia = st.checkbox("Aparência")
         with col2:
-            preconceito_deficiencia = st.checkbox("Deficiência")
-            preconceito_aprendizado = st.checkbox("Dificuldade de aprendizado")
-            preconceito_genero = st.checkbox("Gênero")
+            prec_deficiencia = st.checkbox("Deficiência")
+            prec_aprendizado = st.checkbox("Dificuldade de aprendizado")
+            prec_genero = st.checkbox("Gênero")
         with col3:
-            preconceito_curso = st.checkbox("Curso")
-            preconceito_idade = st.checkbox("Idade")
-            preconceito_nao = st.checkbox("Não sofri preconceito")
+            prec_curso = st.checkbox("Curso")
+            prec_idade = st.checkbox("Idade")
+            prec_nao = st.checkbox("Não sofri preconceito")
 
-        # VIDA ACADÊMICA
-        st.markdown(
-            '<div class="section-header">📚 Vida Acadêmica</div>',
-            unsafe_allow_html=True,
-        )
+        # ===== SEÇÃO 4: VIDA ACADÊMICA =====
+        st.markdown("### 📚 Vida Acadêmica")
 
         tempo_estudo = st.selectbox(
-            "**9. Em relação ao tempo necessário como discente para dedicar no estudo:**",
+            "**Tempo para dedicar aos estudos:**",
             [
                 "É suficiente",
                 "É insuficiente, mas desempenho a maioria das atividades",
@@ -231,59 +259,54 @@ def show_prediction_form(modelo_antigo, engine):
             ],
         )
 
-        # TRABALHO E VIDA PESSOAL
-        st.markdown(
-            '<div class="section-header">💼 Trabalho e Vida Pessoal</div>',
-            unsafe_allow_html=True,
-        )
+        # ===== SEÇÃO 5: TRABALHO E FAMÍLIA =====
+        st.markdown("### 💼 Trabalho e Vida Pessoal")
 
         col1, col2, col3 = st.columns(3)
         with col1:
             trabalha = st.selectbox(
-                "**10. Você trabalha?**",
+                "**Você trabalha?**",
                 [
-                    "Sim, tenho empresa própria / sou autônomo / profissional liberal",
-                    "Sim, com emprego formal",
-                    "Sim, com trabalho temporário",
-                    "Sim, com emprego informal",
-                    "Sou bolsista da Universidade",
-                    "Estou em estágio remunerado",
-                    "Não trabalho ainda",
+                    "Sim, empresa própria/autônomo",
+                    "Sim, emprego formal",
+                    "Sim, trabalho temporário",
+                    "Sim, emprego informal",
+                    "Sou bolsista",
+                    "Estágio remunerado",
+                    "Não trabalho",
                 ],
             )
 
         with col2:
-            horarios_trabalho = st.selectbox(
-                "**11. Se você trabalha, em quais horários?**",
+            horarios = st.selectbox(
+                "**Horários de trabalho:**",
                 [
                     "Tempo integral ou dois turnos",
                     "Tempo parcial ou um turno",
-                    "Horário corrido ou 6 horas diárias",
-                    "Em regime de escala ou plantão",
-                    "Sem dias e horários fixos",
+                    "Horário corrido 6h",
+                    "Escala ou plantão",
+                    "Sem horários fixos",
                     "Não se aplica",
                 ],
             )
 
         with col3:
             estado_civil = st.selectbox(
-                "**12. É casado(a) / está em união estável:**", ["Não", "Sim"]
+                "**Estado civil:**", ["Não casado", "Casado/união estável"]
             )
 
         col1, col2 = st.columns(2)
         with col1:
-            tem_filhos = st.selectbox("**13. Tem filhos?**", ["Não", "Sim"])
-
+            tem_filhos = st.selectbox("**Tem filhos?**", ["Não", "Sim"])
+            qtd_filhos = 0
             if tem_filhos == "Sim":
                 qtd_filhos = st.number_input(
-                    "Quantos filhos?", min_value=1, max_value=10, value=1
+                    "Quantos?", min_value=1, max_value=10, value=1
                 )
-            else:
-                qtd_filhos = 0
 
         with col2:
-            contribuicao_financeira = st.selectbox(
-                "**14. Você contribui para o sustento financeiro da família:**",
+            contribuicao = st.selectbox(
+                "**Contribuição financeira familiar:**",
                 [
                     "Sim, sou o único com renda",
                     "Sim, sou a principal",
@@ -292,423 +315,303 @@ def show_prediction_form(modelo_antigo, engine):
                 ],
             )
 
-        # QUESTÕES ABERTAS
-        st.markdown(
-            '<div class="section-header">✍️ Questões Abertas</div>',
-            unsafe_allow_html=True,
-        )
+        # ===== SEÇÃO 6: QUESTÕES ABERTAS =====
+        st.markdown("### ✍️ Questões Abertas")
 
         col1, col2 = st.columns(2)
         with col1:
             dificuldades = st.text_area(
-                "**15. Cite as principais dificuldades para sua permanência no Curso:** *(apenas informativo)*",
-                placeholder="Descreva as principais dificuldades...",
-                help="Este campo é coletado mas não influencia a predição do modelo",
+                "**Principais dificuldades *(informativo)*:**",
+                placeholder="Descreva suas dificuldades...",
             )
 
         with col2:
-            # ===== PERGUNTA PRINCIPAL (TARGET) =====
-            ja_pensou_evasao = st.text_area(
-                "**🎯 16. Já pensou em trancar disciplinas, período ou abandonar o curso? Se sim, por quê?**",
-                placeholder="Descreva se já pensou em evasão e os motivos...",
-                help="Esta é a pergunta principal da pesquisa. Seja sincero(a) em sua resposta.",
+            resposta_evasao = st.text_area(
+                "**🎯 Já pensou em trancar ou abandonar o curso? Por quê?**",
+                placeholder="Seja sincero(a)...",
+                help="Esta é a pergunta principal.",
             )
 
-        # BOTÃO DE SUBMISSÃO
-        submit_button = st.form_submit_button(label="📊 Analisar Risco de Evasão")
+        submit = st.form_submit_button("📊 Analisar Risco de Evasão")
 
-    # ===== PROCESSAMENTO E RESULTADOS =====
-    if submit_button:
-        # Processamento do tempo de deslocamento (coletado mas não usado no modelo)
-        tempo_numerico = 0
-        if tempo_deslocamento:
-            numeros = re.findall(r"\d+", tempo_deslocamento)
-            if numeros:
-                tempo_numerico = int(numeros[0])
+    # ===== PROCESSAMENTO DA SUBMISSÃO =====
+    if submit:
 
-        # ===== ANÁLISE DA PERGUNTA PRINCIPAL =====
-        # Determinar se o usuário pensou em evasão baseado na resposta
-        resposta_evasao_lower = ja_pensou_evasao.lower().strip()
+        # 1. CODIFICAR A RESPOSTA DE EVASÃO (ground truth)
+        target_real = codificar_resposta_evasao(resposta_evasao)
+        pensou_text = "SIM" if target_real == 1 else "NÃO"
 
-        # Palavras-chave que indicam pensamento de evasão
-        palavras_positivas = [
-            "sim",
-            "já",
-            "pensei",
-            "pensando",
-            "trancar",
-            "abandonar",
-            "desistir",
-            "parar",
-            "sair",
-            "largar",
-            "deixar",
-            "quero sair",
-            "vou trancar",
-            "pretendo",
-            "cogitei",
-            "considerei",
-            "às vezes",
-            "algumas vezes",
-            "dificuldade",
-            "difícil",
-            "complicado",
-            "não aguento",
-            "cansado",
-            "estressado",
-            "sobrecarregado",
-        ]
-
-        palavras_negativas = [
-            "não",
-            "nunca",
-            "jamais",
-            "nada",
-            "zero",
-            "nenhuma",
-            "nem pensar",
-            "de jeito nenhum",
-            "claro que não",
-            "definitivamente não",
-        ]
-
-        # Análise do texto
-        pensou_evasao = False
-
-        if not resposta_evasao_lower or len(resposta_evasao_lower) < 3:
-            # Resposta muito curta ou vazia - considera como não pensou
-            pensou_evasao = False
-        else:
-            # Verificar palavras negativas primeiro (mais específicas)
-            if any(palavra in resposta_evasao_lower for palavra in palavras_negativas):
-                pensou_evasao = False
-            # Se não tem palavras negativas, verificar palavras positivas
-            elif any(
-                palavra in resposta_evasao_lower for palavra in palavras_positivas
-            ):
-                pensou_evasao = True
-            # Se não tem palavras-chave claras, mas tem mais de 20 caracteres, considera como sim
-            elif len(resposta_evasao_lower) > 20:
-                pensou_evasao = True
-            else:
-                pensou_evasao = False
-
-        # Conversão para valor numérico (target)
-        target_value = 1 if pensou_evasao else 0
-
-        # ===== CRIAÇÃO DOS DADOS PARA O NOVO MODELO =====
-        # Apenas as 21 variáveis que o novo modelo aceita (sem data leakage)
-        dados_para_modelo = {
-            "Como é o seu deslocamento até a universidade?": [
-                "Carro",
-                "Moto",
-                "Ônibus",
-                "A pé",
-                "Outro",
-            ].index(tipo_transporte),
-            "Com relação ao transporte do item anterior, ele é:": [
-                "Próprio",
-                "Cedido",
-                "Público(gratuito)",
-                "Particular(táxi/moto-táxi)",
-                "Não se aplica",
-            ].index(propriedade_transporte),
-            "O transporte representa uma barreira/dificuldade para frequentar a universidade?": [
-                "Sim, sempre",
-                "Sim, às vezes",
-                "Não, mas já foi",
-                "Não, nunca foi",
-            ].index(
-                barreira_transporte
+        # 2. PREPARAR FEATURES NUMÉRICAS
+        # Mapeamentos exatos do treinamento
+        dados_numericos = {
+            "Como é o seu deslocamento até a universidade?": {
+                "A pé": 0,
+                "Carro": 1,
+                "Moto": 2,
+                "Outro": 3,
+                "Ônibus": 4,
+            }[tipo_transporte],
+            "Com relação ao transporte do item anterior, ele é:": {
+                "Cedido": 0,
+                "Não se aplica": 1,
+                "Particular(táxi)": 2,
+                "Próprio": 3,
+                "Público(gratuito)": 4,
+            }[propriedade],
+            "O transporte representa uma barreira/dificuldade para frequentar a universidade?": {
+                "Não, mas já foi": 0,
+                "Não, nunca foi": 1,
+                "Sim, sempre": 2,
+                "Sim, às vezes": 3,
+            }[
+                barreira
+            ],
+            "Você mora em Angicos?": {
+                "Durmo nos dias de aula": 0,
+                "Não": 1,
+                "Sim": 2,
+            }[mora_cidade],
+            "Você se identifica com o curso que está fazendo?": {
+                "Não, mas quero concluir": 0,
+                "Não, não sei se concluirei": 1,
+                "Sim": 2,
+            }[identificacao_curso],
+            "Como você considera a acessibilidade do Campus?": {
+                "Adequada": 0,
+                "Inadequada": 1,
+            }[acessibilidade],
+            "Em relação ao tempo necessário como discente para dedicar no estudo?": {
+                "É insuficiente e não consigo realizar as atividades obrigatórias": 0,
+                "É insuficiente, mas desempenho a maioria das atividades": 1,
+                "É insuficiente, mas só realizo as atividades obrigatórias": 2,
+                "É suficiente": 3,
+            }[tempo_estudo],
+            "Você trabalha?": {
+                "Estágio remunerado": 0,
+                "Não trabalho": 1,
+                "Sim, emprego formal": 2,
+                "Sim, emprego informal": 3,
+                "Sim, trabalho temporário": 4,
+                "Sim, empresa própria/autônomo": 5,
+                "Sou bolsista": 6,
+            }[trabalha],
+            "Se você trabalha, em quais horários?": {
+                "Escala ou plantão": 0,
+                "Horário corrido 6h": 1,
+                "Não se aplica": 2,
+                "Sem horários fixos": 3,
+                "Tempo integral ou dois turnos": 4,
+                "Tempo parcial ou um turno": 5,
+            }[horarios],
+            "É casado(a)/está em união estável?": {
+                "Não casado": 0,
+                "Casado/união estável": 1,
+            }[estado_civil],
+            "Tem filhos?": {"Não": 0, "Sim": 1}[tem_filhos],
+            "Você contribui para o sustento financeiro da família?": {
+                "Não contribuo": 0,
+                "Sim, mas não sou o principal": 1,
+                "Sim, sou a principal": 2,
+                "Sim, sou o único com renda": 3,
+            }[contribuicao],
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Aparência": int(
+                prec_aparencia and not prec_nao
             ),
-            "Você mora em Angicos?": [
-                "Sim",
-                "Não",
-                "Durmo nos dias de aula e atividades",
-            ].index(mora_angicos),
-            "Você se identifica com o curso que está fazendo?": [
-                "Sim",
-                "Não, mas quero concluir",
-                "Não, não sei se concluirei",
-            ].index(identificacao_curso),
-            "Como você considera a acessibilidade do Campus?": [
-                "Adequada",
-                "Inadequada",
-            ].index(acessibilidade),
-            "Em relação ao tempo necessário como discente para dedicar no estudo?": [
-                "É suficiente",
-                "É insuficiente, mas desempenho a maioria das atividades",
-                "É insuficiente, mas só realizo as atividades obrigatórias",
-                "É insuficiente e não consigo realizar as atividades obrigatórias",
-            ].index(tempo_estudo),
-            "Você trabalha?": [
-                "Sim, tenho empresa própria / sou autônomo / profissional liberal",
-                "Sim, com emprego formal",
-                "Sim, com trabalho temporário",
-                "Sim, com emprego informal",
-                "Sou bolsista da Universidade",
-                "Estou em estágio remunerado",
-                "Não trabalho ainda",
-            ].index(trabalha),
-            "Se você trabalha, em quais horários?": [
-                "Tempo integral ou dois turnos",
-                "Tempo parcial ou um turno",
-                "Horário corrido ou 6 horas diárias",
-                "Em regime de escala ou plantão",
-                "Sem dias e horários fixos",
-                "Não se aplica",
-            ].index(horarios_trabalho),
-            "É casado(a)/está em união estável?": 1 if estado_civil == "Sim" else 0,
-            "Tem filhos?": 1 if tem_filhos == "Sim" else 0,
-            "Você contribui para o sustento financeiro da família?": [
-                "Sim, sou o único com renda",
-                "Sim, sou a principal",
-                "Sim, mas não sou o principal",
-                "Não contribuo",
-            ].index(contribuicao_financeira),
-            # Colunas de preconceito como boolean (lógica mutuamente exclusiva)
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Aparência": preconceito_aparencia
-            and not preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Condição financeira": preconceito_financeiro
-            and not preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Cor de pele": preconceito_cor
-            and not preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Curso": preconceito_curso
-            and not preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Deficiência": preconceito_deficiencia
-            and not preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Dificuldade de aprendizado": preconceito_aprendizado
-            and not preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Gênero": preconceito_genero
-            and not preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Não": preconceito_nao,
-            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_idade": preconceito_idade
-            and not preconceito_nao,
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Condição financeira": int(
+                prec_financeiro and not prec_nao
+            ),
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Cor de pele": int(
+                prec_cor and not prec_nao
+            ),
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Curso": int(
+                prec_curso and not prec_nao
+            ),
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Deficiência": int(
+                prec_deficiencia and not prec_nao
+            ),
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Dificuldade de aprendizado": int(
+                prec_aprendizado and not prec_nao
+            ),
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Gênero": int(
+                prec_genero and not prec_nao
+            ),
+            "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_idade": int(
+                prec_idade and not prec_nao
+            ),
         }
 
-        # Preprocessar dados
-        dados_processados = preprocess_data_for_new_model(
-            dados_para_modelo, modelo_data
-        )
+        # 3. PREPROCESSAR
+        dados_processados = preprocess_input(dados_numericos, modelo_data)
 
         if dados_processados is not None:
             try:
-                # Fazer predição
-                probabilidade = modelo_data["modelo"].predict_proba(dados_processados)[
+                # 4. PREDIÇÃO
+                # No CSV original: 0=Pensou em evasão, 1=Não pensou
+                # Como não invertemos mais, a classe 0 do modelo = Pensou em evasão
+                probabilidades = modelo_data["modelo"].predict_proba(dados_processados)[
                     0
-                ][1]
-                predicao_label = modelo_data["modelo"].predict(dados_processados)[0]
+                ]
 
-                # ===== SALVAR NO BANCO DE DADOS (com todos os campos, inclusive informativos) =====
+                # Com o modelo corrigido:
+                # Classe 0 = NÃO pensou em evasão (baixo risco)
+                # Classe 1 = SIM pensou em evasão (alto risco)
+                probabilidade_evasao = probabilidades[
+                    1
+                ]  # Usar a probabilidade da CLASSE 1
+                predicao = 1 if probabilidade_evasao > 0.5 else 0
+                # 5. SALVAR NO BANCO
                 data_to_save = pd.DataFrame(
                     [
                         {
                             "timestamp": datetime.now(),
-                            "user_submitting": st.session_state.get(
-                                "username", "anonymous"
-                            ),
-                            "curso": curso,  # Campo informativo
-                            "semestre_ingresso": semestre_ingresso,  # Campo informativo
-                            "identificacao_curso": identificacao_curso,
+                            "user_submitting": st.session_state.get("username", "anon"),
+                            "curso": curso,
                             "tipo_transporte": tipo_transporte,
-                            "propriedade_transporte": propriedade_transporte,
-                            "barreira_transporte": barreira_transporte,
-                            "mora_na_cidade": mora_angicos,
-                            "tempo_deslocamento": tempo_numerico,  # Campo informativo
+                            "propriedade_transporte": propriedade,
+                            "barreira_transporte": barreira,
+                            "mora_na_cidade": mora_cidade,
+                            "identificacao_curso": identificacao_curso,
                             "acessibilidade_campus": acessibilidade,
-                            "preconceito_cor": preconceito_cor,
-                            "preconceito_financeiro": preconceito_financeiro,
-                            "preconceito_aparencia": preconceito_aparencia,
-                            "preconceito_deficiencia": preconceito_deficiencia,
-                            "preconceito_aprendizado": preconceito_aprendizado,
-                            "preconceito_genero": preconceito_genero,
-                            "preconceito_curso": preconceito_curso,
-                            "preconceito_idade": preconceito_idade,
-                            "preconceito_nao": preconceito_nao,
+                            "preconceito_cor": prec_cor,
+                            "preconceito_financeiro": prec_financeiro,
+                            "preconceito_aparencia": prec_aparencia,
+                            "preconceito_deficiencia": prec_deficiencia,
+                            "preconceito_aprendizado": prec_aprendizado,
+                            "preconceito_genero": prec_genero,
+                            "preconceito_curso": prec_curso,
+                            "preconceito_idade": prec_idade,
+                            "preconceito_nao": prec_nao,
                             "tempo_estudo": tempo_estudo,
                             "situacao_trabalho": trabalha,
-                            "horarios_trabalho": horarios_trabalho,
-                            "estado_civil": True if estado_civil == "Sim" else False,
-                            "tem_filhos": True if tem_filhos == "Sim" else False,
+                            "horarios_trabalho": horarios,
+                            "estado_civil": estado_civil == "Casado/união estável",
+                            "tem_filhos": tem_filhos == "Sim",
                             "qtd_filhos": qtd_filhos,
-                            "contribuicao_financeira": contribuicao_financeira,
-                            "dificuldades_permanencia": dificuldades,  # Campo informativo
-                            "resposta_completa_evasao": ja_pensou_evasao,
-                            "pensou_evasao_real": target_value,
-                            "prediction_label": int(predicao_label),
-                            "prediction_score": float(probabilidade),
+                            "contribuicao_financeira": contribuicao,
+                            "dificuldades_permanencia": dificuldades,
+                            "resposta_completa_evasao": resposta_evasao,
+                            "pensou_evasao_real": int(target_real),
+                            "prediction_label": int(predicao),
+                            "prediction_score": float(probabilidade_evasao),
                         }
                     ]
                 )
 
-                # Salvar dados
                 if db.save_submission(engine, data_to_save):
-                    st.success("✅ Análise registrada com sucesso no banco de dados!")
+                    st.success("✅ Análise registrada no banco de dados!")
 
-                # ===== EXIBIÇÃO DOS RESULTADOS =====
+                # 6. EXIBIR RESULTADOS
                 st.markdown("---")
-                st.header("📊 Resultado da Análise Preditiva")
+                st.header("📊 Resultado da Análise")
 
-                # Mostrar a resposta real primeiro
-                resposta_analise = "SIM" if pensou_evasao else "NÃO"
                 st.info(
-                    f"**Análise da resposta:** O estudante **{resposta_analise}** pensou em evasão"
+                    f"**Análise da resposta:** O estudante **{pensou_text}** pensou em evasão"
                 )
 
-                if ja_pensou_evasao.strip():
-                    with st.expander("📝 Resposta completa do estudante"):
-                        st.write(ja_pensou_evasao)
+                if resposta_evasao.strip():
+                    with st.expander("📝 Resposta completa"):
+                        st.write(resposta_evasao)
 
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    if predicao_label == 1:
-                        st.markdown(
-                            '<div class="error-card"><h2>⚠️ ALTO RISCO</h2><p>Estudante tem alta probabilidade de <strong>pensar em trancar disciplinas, período ou abandonar o curso</strong></p></div>',
-                            unsafe_allow_html=True,
-                        )
+                    if probabilidade_evasao > 0.5:
+                        st.error("### ⚠️ ALTO RISCO")
                         st.metric(
                             "Probabilidade de Pensar em Evasão",
-                            f"{probabilidade*100:.1f}%",
+                            f"{probabilidade_evasao*100:.1f}%",
                         )
                     else:
-                        st.markdown(
-                            '<div class="success-card"><h2>✅ BAIXO RISCO</h2><p>Estudante tem baixa probabilidade de pensar em evasão</p></div>',
-                            unsafe_allow_html=True,
-                        )
+                        st.success("### ✅ BAIXO RISCO")
                         st.metric(
-                            "Probabilidade de Permanência",
-                            f"{(1-probabilidade)*100:.1f}%",
+                            "Probabilidade de Risco de Evasão",  # Ou mantenha "de Permanência", mas a lógica muda
+                            f"{probabilidade_evasao*100:.1f}%",
+                        )
+
+                        # E, para maior clareza, você pode exibir a probabilidade de permanência explicitamente:
+                        st.write(
+                            f"Probabilidade de Permanência: {(1-probabilidade_evasao)*100:.1f}%"
                         )
 
                 with col2:
-                    if predicao_label == 1:
-                        st.subheader("🚨 Ações Recomendadas")
+                    st.subheader("📌 Ações Recomendadas")
+                    if probabilidade_evasao > 0.5:
                         st.error(
                             """
                         **Intervenção Imediata:**
                         - Contato proativo com o estudante
-                        - Análise das dificuldades específicas mencionadas
-                        - Encaminhamento para suporte acadêmico/psicológico
-                        - Verificação de auxílios estudantis disponíveis
-                        - Acompanhamento sistemático do desempenho
+                        - Análise das dificuldades específicas
+                        - Encaminhamento para suporte
+                        - Verificação de auxílios disponíveis
                         """
                         )
                     else:
-                        st.subheader("👍 Recomendações")
                         st.success(
                             """
                         **Acompanhamento Preventivo:**
-                        - Monitoramento acadêmico regular
-                        - Incentivo à participação em atividades extracurriculares
-                        - Estímulo ao engajamento em projetos de pesquisa/extensão
-                        - Manutenção do canal de comunicação aberto
+                        - Monitoramento regular
+                        - Incentivo à participação em atividades
+                        - Canal de comunicação aberto
                         """
                         )
 
-                # Comparação: Predição vs Realidade
-                if pensou_evasao and predicao_label == 1:
+                # 7. VALIDAÇÃO DA PREDIÇÃO
+                if target_real == predicao:
                     st.success(
-                        "✅ **Predição CORRETA**: O modelo identificou corretamente o risco de evasão!"
-                    )
-                elif not pensou_evasao and predicao_label == 0:
-                    st.success(
-                        "✅ **Predição CORRETA**: O modelo identificou corretamente a baixa propensão à evasão!"
-                    )
-                elif pensou_evasao and predicao_label == 0:
-                    st.warning(
-                        "⚠️ **Falso Negativo**: O estudante PENSOU em evasão, mas o modelo não detectou alto risco."
+                        "✅ **Predição CORRETA**: O modelo acertou a classificação!"
                     )
                 else:
-                    st.warning(
-                        "⚠️ **Falso Positivo**: O modelo detectou alto risco, mas o estudante NÃO pensou em evasão."
-                    )
+                    if target_real == 1 and predicao == 0:
+                        st.warning(
+                            "⚠️ **Falso Negativo**: Estudante pensou em evasão, mas modelo não detectou."
+                        )
+                    else:
+                        st.warning(
+                            "⚠️ **Falso Positivo**: Modelo detectou risco, mas estudante não pensou em evasão."
+                        )
 
-                # Informações do modelo
+                # 8. MÉTRICAS DO MODELO
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.metric(
-                        "Acurácia (AUC)", f"{modelo_data['metricas']['auc_test']:.3f}"
-                    )
+                    st.metric("AUC", f"{modelo_data['metricas']['test_auc']:.3f}")
                 with col2:
-                    st.metric("Tipo de Modelo", modelo_data["metricas"]["modelo_tipo"])
+                    st.metric("Tipo", modelo_data["metricas"]["nome"])
                 with col3:
-                    st.metric("Features Utilizadas", len(modelo_data["feature_names"]))
+                    st.metric("Features", len(modelo_data["feature_names"]))
 
-                # Fatores de risco
+                # 9. FATORES DE RISCO
                 st.markdown("---")
                 st.subheader("🔍 Fatores de Risco Identificados")
 
-                fatores_risco = []
-
-                if barreira_transporte in ["Sim, sempre", "Sim, às vezes"]:
-                    fatores_risco.append("Dificuldades de transporte")
+                fatores = []
+                if barreira in ["Sim, sempre", "Sim, às vezes"]:
+                    fatores.append("Dificuldades de transporte")
                 if identificacao_curso != "Sim":
-                    fatores_risco.append(
-                        "Baixa identificação com a área de conhecimento do curso"
-                    )
-                if tempo_estudo in [
-                    "É insuficiente e não consigo realizar as atividades obrigatórias",
-                    "É insuficiente, mas só realizo as atividades obrigatórias",
-                ]:
-                    fatores_risco.append("Tempo insuficiente para estudos")
-                if trabalha in [
-                    "Sim, com emprego formal",
-                    "Sim, tenho empresa própria / sou autônomo / profissional liberal",
-                ]:
-                    fatores_risco.append("Trabalho que pode interferir nos estudos")
-                if horarios_trabalho == "Tempo integral ou dois turnos":
-                    fatores_risco.append("Trabalho em período integral")
+                    fatores.append("Baixa identificação com o curso")
+                if "insuficiente" in tempo_estudo.lower():
+                    fatores.append("Tempo insuficiente para estudos")
+                if trabalha in ["Sim, emprego formal", "Sim, empresa própria/autônomo"]:
+                    fatores.append("Trabalho pode interferir nos estudos")
+                if horarios == "Tempo integral ou dois turnos":
+                    fatores.append("Trabalho em período integral")
                 if tem_filhos == "Sim":
-                    fatores_risco.append("Responsabilidades familiares (filhos)")
-                if any(
-                    [
-                        preconceito_cor,
-                        preconceito_financeiro,
-                        preconceito_aparencia,
-                        preconceito_deficiencia,
-                        preconceito_aprendizado,
-                        preconceito_genero,
-                        preconceito_curso,
-                        preconceito_idade,
-                    ]
-                ):
-                    fatores_risco.append("Experiência de preconceito/violência")
-                if contribuicao_financeira in [
+                    fatores.append("Responsabilidades familiares")
+                if any([prec_cor, prec_financeiro, prec_aparencia, prec_deficiencia]):
+                    fatores.append("Experiência de preconceito/violência")
+                if contribuicao in [
                     "Sim, sou o único com renda",
                     "Sim, sou a principal",
                 ]:
-                    fatores_risco.append("Responsabilidade financeira familiar")
+                    fatores.append("Responsabilidade financeira familiar")
 
-                if fatores_risco:
-                    for fator in fatores_risco:
+                if fatores:
+                    for fator in fatores:
                         st.write(f"• {fator}")
                 else:
                     st.write("• Nenhum fator de risco específico identificado")
 
-                # Mostrar diferenças do modelo anterior
-                with st.expander("🔬 Melhorias do Novo Modelo"):
-                    st.markdown(
-                        """
-                    **Modelo Anterior (com problemas):**
-                    - ❌ AUC = 1.0000 (falso, por data leakage)
-                    - ❌ Intercept = -14.33 (extremo)
-                    - ❌ Usava Curso, Semestre e Dificuldades (vazavam informação)
-                    
-                    **Modelo Atual (corrigido):**
-                    - ✅ AUC = 0.8681 (real e confiável)
-                    - ✅ Intercept = 0.37 (normalizado)
-                    - ✅ Apenas preditores legítimos (21 variáveis)
-                    - ✅ Cientificamente válido
-                    
-                    **Campos informativos coletados mas não usados na predição:**
-                    - 📝 Área de Conhecimento (Curso)
-                    - 📝 Semestre de Ingresso
-                    - 📝 Dificuldades de Permanência
-                    - 📝 Tempo de Deslocamento
-                    """
-                    )
-
             except Exception as e:
                 st.error(f"❌ Erro na predição: {e}")
-                st.write("Dados enviados para o modelo:", dados_para_modelo)
+                import traceback
+
+                st.code(traceback.format_exc())
