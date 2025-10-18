@@ -8,8 +8,8 @@ import plotly.graph_objects as go
 
 
 def show_admin_dashboard(engine):
-    """Dashboard administrativo adaptado para Sistema Híbrido"""
-    st.title("🔑 Dashboard Administrativo - Sistema Híbrido")
+    """Dashboard administrativo para o modelo Random Forest"""
+    st.title("🔑 Dashboard Administrativo - Modelo Random Forest")
 
     # Carregar dados
     df = db.load_data(engine)
@@ -20,44 +20,45 @@ def show_admin_dashboard(engine):
         st.info("Execute algumas análises para popular o dashboard.")
         return
 
-    # ===== CLASSIFICAR POR CATEGORIAS DO HÍBRIDO =====
+    # ===== CLASSIFICAR POR CATEGORIAS =====
     def classificar_risco(score):
-        if score < 0.35:
+        """Classifica baseado no score do Random Forest"""
+        if score < 0.30:
             return "BAIXO"
-        elif score < 0.55:
+        elif score < 0.50:
             return "MODERADO"
-        elif score < 0.75:
+        elif score < 0.70:
             return "ALTO"
         else:
             return "CRÍTICO"
 
-    df["categoria_hibrida"] = df["prediction_score"].apply(classificar_risco)
+    df["categoria_risco"] = df["prediction_score"].apply(classificar_risco)
 
     # ===== ALERTAS CRÍTICOS =====
-    st.markdown("## 🚨 Sistema de Alertas - Sistema Híbrido")
+    st.markdown("## 🚨 Sistema de Alertas")
 
-    casos_criticos = df[df["prediction_score"] >= 0.75]  # CRÍTICO: ≥75%
+    casos_criticos = df[df["prediction_score"] >= 0.70]  # CRÍTICO: ≥70%
     casos_altos = df[
-        (df["prediction_score"] >= 0.55) & (df["prediction_score"] < 0.75)
-    ]  # ALTO: 55-75%
+        (df["prediction_score"] >= 0.50) & (df["prediction_score"] < 0.70)
+    ]  # ALTO: 50-70%
     casos_moderados = df[
-        (df["prediction_score"] >= 0.35) & (df["prediction_score"] < 0.55)
-    ]  # MODERADO: 35-55% ← CORRIGIDO
-    casos_baixos = df[df["prediction_score"] < 0.35]  # BAIXO: <35%
+        (df["prediction_score"] >= 0.30) & (df["prediction_score"] < 0.50)
+    ]  # MODERADO: 30-50%
+    casos_baixos = df[df["prediction_score"] < 0.30]  # BAIXO: <30%
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("🔴 CRÍTICO", len(casos_criticos), help="Score ≥ 75%")
+        st.metric("🔴 CRÍTICO", len(casos_criticos), help="Score ≥ 70%")
     with col2:
-        st.metric("🟠 ALTO", len(casos_altos), help="55-75%")
+        st.metric("🟠 ALTO", len(casos_altos), help="50-70%")
     with col3:
-        st.metric("🟡 MODERADO", len(casos_moderados), help="35-55%")  # ← CORRIGIDO
+        st.metric("🟡 MODERADO", len(casos_moderados), help="30-50%")
     with col4:
-        st.metric("🟢 BAIXO", len(casos_baixos), help="< 35%")
+        st.metric("🟢 BAIXO", len(casos_baixos), help="< 30%")
 
     if len(casos_criticos) > 0:
-        st.error(f"🚨 **ALERTA MÁXIMO**: {len(casos_criticos)} casos CRÍTICOS (≥90%)")
+        st.error(f"🚨 **ALERTA MÁXIMO**: {len(casos_criticos)} casos CRÍTICOS (≥70%)")
         with st.expander("Ver casos urgentes"):
             urgentes_display = casos_criticos[
                 ["timestamp", "curso", "prediction_score", "resposta_completa_evasao"]
@@ -69,8 +70,8 @@ def show_admin_dashboard(engine):
 
     st.divider()
 
-    # ===== MÉTRICAS DO SISTEMA HÍBRIDO =====
-    st.markdown("## 📊 Métricas do Sistema Híbrido")
+    # ===== MÉTRICAS PRINCIPAIS =====
+    st.markdown("## 📊 Métricas do Modelo")
 
     col1, col2, col3 = st.columns(3)
 
@@ -80,8 +81,8 @@ def show_admin_dashboard(engine):
 
     with col2:
         score_medio = df["prediction_score"].mean()
-        st.metric("Score Médio Geral", f"{score_medio*100:.1f}%")
-        st.caption("Média ponderada ML+Regras")
+        st.metric("Score Médio", f"{score_medio*100:.1f}%")
+        st.caption("Probabilidade média de evasão")
 
     with col3:
         acuracia = (
@@ -90,10 +91,10 @@ def show_admin_dashboard(engine):
         st.metric("Acurácia", f"{acuracia:.1f}%")
         st.caption("Concordância com respostas reais")
 
-    # Distribuição por categoria
+    # ===== DISTRIBUIÇÃO POR CATEGORIA =====
     st.markdown("### 📈 Distribuição por Categoria de Risco")
 
-    dist_categorias = df["categoria_hibrida"].value_counts()
+    dist_categorias = df["categoria_risco"].value_counts()
 
     fig_pizza = go.Figure(
         data=[
@@ -114,8 +115,8 @@ def show_admin_dashboard(engine):
     with col1:
         st.markdown("**Contagem por Categoria:**")
         for cat in ["BAIXO", "MODERADO", "ALTO", "CRÍTICO"]:
-            count = len(df[df["categoria_hibrida"] == cat])
-            pct = (count / len(df)) * 100
+            count = len(df[df["categoria_risco"] == cat])
+            pct = (count / len(df)) * 100 if len(df) > 0 else 0
             st.write(f"- {cat}: {count} casos ({pct:.1f}%)")
 
     with col2:
@@ -130,15 +131,13 @@ def show_admin_dashboard(engine):
     # ===== MATRIZ DE CONFUSÃO =====
     st.markdown("### 🎯 Matriz de Confusão e Métricas")
 
-    # Reclassificar usando threshold do híbrido (55% ao invés de 50%)
-    df["prediction_hibrido"] = (df["prediction_score"] >= 0.55).astype(int)
+    # Calcular matriz de confusão
+    tp = len(df[(df["prediction_label"] == 1) & (df["pensou_evasao_real"] == 1)])
+    fp = len(df[(df["prediction_label"] == 1) & (df["pensou_evasao_real"] == 0)])
+    tn = len(df[(df["prediction_label"] == 0) & (df["pensou_evasao_real"] == 0)])
+    fn = len(df[(df["prediction_label"] == 0) & (df["pensou_evasao_real"] == 1)])
 
-    tp = len(df[(df["prediction_hibrido"] == 1) & (df["pensou_evasao_real"] == 1)])
-    fp = len(df[(df["prediction_hibrido"] == 1) & (df["pensou_evasao_real"] == 0)])
-    tn = len(df[(df["prediction_hibrido"] == 0) & (df["pensou_evasao_real"] == 0)])
-    fn = len(df[(df["prediction_hibrido"] == 0) & (df["pensou_evasao_real"] == 1)])
-
-    # Evitar divisão por zero
+    # Calcular métricas (evitando divisão por zero)
     precisao = (tp / (tp + fp)) if (tp + fp) > 0 else 0
     recall = (tp / (tp + fn)) if (tp + fn) > 0 else 0
     f1_score = (
@@ -146,32 +145,35 @@ def show_admin_dashboard(engine):
     )
     especificidade = (tn / (tn + fp)) if (tn + fp) > 0 else 0
 
-    # Mostrar aviso se não há dados suficientes
+    # Verificar se há dados suficientes
     if tp + fp == 0:
         st.warning(
             "⚠️ Nenhum caso classificado como alto risco. Matriz de confusão não pode ser calculada."
         )
         st.info(
-            "💡 Faça mais testes incluindo cenários de alto risco (score > 55%) para popular as métricas."
+            "💡 Faça mais testes incluindo cenários de alto risco (score > 50%) para popular as métricas."
         )
 
+    # Exibir métricas
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         st.metric("Precisão", f"{precisao:.3f}" if precisao > 0 else "N/A")
         st.caption("TP/(TP+FP)")
     with col2:
-        st.metric("Recall", f"{recall:.3f}" if recall > 0 else "N/A")
+        st.metric("Recall (Sensibilidade)", f"{recall:.3f}" if recall > 0 else "N/A")
         st.caption("TP/(TP+FN)")
     with col3:
         st.metric("F1-Score", f"{f1_score:.3f}" if f1_score > 0 else "N/A")
         st.caption("Média harmônica")
     with col4:
-        st.metric("Especificidade", f"{especificidade:.3f}")
+        st.metric(
+            "Especificidade", f"{especificidade:.3f}" if especificidade > 0 else "N/A"
+        )
         st.caption("TN/(TN+FP)")
 
     # Matriz visual
-    if tp + fp > 0:  # Só mostrar se há dados
+    if tp + fp > 0:
         col1, col2 = st.columns([1, 2])
 
         with col1:
@@ -185,6 +187,7 @@ def show_admin_dashboard(engine):
             st.dataframe(matriz_df, use_container_width=True)
 
         with col2:
+            # Avaliar desempenho
             if precisao >= 0.8:
                 st.success(f"✅ Alta precisão ({precisao:.1%})")
             elif precisao >= 0.6:
@@ -237,11 +240,21 @@ def show_admin_dashboard(engine):
                 fatores_risco.get("Distância do Campus", 0) + 1
             )
 
+        # Verificar se sofreu algum preconceito
+        colunas_preconceito = [
+            col
+            for col in df.columns
+            if "preconceito" in col.lower() and col != "preconceito_nao"
+        ]
+        if any(row.get(col, False) for col in colunas_preconceito):
+            fatores_risco["Experiência de Preconceito/Violência"] = (
+                fatores_risco.get("Experiência de Preconceito/Violência", 0) + 1
+            )
+
     if fatores_risco:
         fatores_ordenados = sorted(
             fatores_risco.items(), key=lambda x: x[1], reverse=True
         )
-
         fatores_df = pd.DataFrame(fatores_ordenados, columns=["Fator", "Frequência"])
 
         fig_fatores = px.bar(
@@ -255,23 +268,23 @@ def show_admin_dashboard(engine):
         )
         fig_fatores.update_layout(height=400)
         st.plotly_chart(fig_fatores, use_container_width=True)
+    else:
+        st.info("Nenhum fator de risco específico identificado nos dados.")
 
     st.divider()
 
-    # ===== VISUALIZAÇÕES TEMPORAIS =====
+    # ===== EVOLUÇÃO TEMPORAL =====
     st.markdown("## 📈 Evolução Temporal")
 
     df["data"] = pd.to_datetime(df["timestamp"]).dt.date
 
-    temporal = (
-        df.groupby(["data", "categoria_hibrida"]).size().reset_index(name="count")
-    )
+    temporal = df.groupby(["data", "categoria_risco"]).size().reset_index(name="count")
 
     fig_temporal = px.line(
         temporal,
         x="data",
         y="count",
-        color="categoria_hibrida",
+        color="categoria_risco",
         title="Evolução das Categorias de Risco ao Longo do Tempo",
         color_discrete_map={
             "BAIXO": "#22c55e",
@@ -301,13 +314,13 @@ def show_admin_dashboard(engine):
             color_discrete_sequence=["#667eea"],
         )
         fig_hist.add_vline(
-            x=0.35, line_dash="dash", line_color="green", annotation_text="Baixo"
+            x=0.30, line_dash="dash", line_color="green", annotation_text="Baixo"
         )
         fig_hist.add_vline(
-            x=0.55, line_dash="dash", line_color="yellow", annotation_text="Moderado"
+            x=0.50, line_dash="dash", line_color="orange", annotation_text="Threshold"
         )
         fig_hist.add_vline(
-            x=0.75, line_dash="dash", line_color="red", annotation_text="Alto"
+            x=0.70, line_dash="dash", line_color="red", annotation_text="Crítico"
         )
         fig_hist.update_layout(height=350)
         st.plotly_chart(fig_hist, use_container_width=True)
@@ -316,10 +329,10 @@ def show_admin_dashboard(engine):
         # Box plot por categoria
         fig_box = px.box(
             df,
-            x="categoria_hibrida",
+            x="categoria_risco",
             y="prediction_score",
             title="Distribuição de Scores por Categoria",
-            color="categoria_hibrida",
+            color="categoria_risco",
             color_discrete_map={
                 "BAIXO": "#22c55e",
                 "MODERADO": "#eab308",
@@ -330,19 +343,19 @@ def show_admin_dashboard(engine):
         fig_box.update_layout(height=350, showlegend=False)
         st.plotly_chart(fig_box, use_container_width=True)
 
-    # Comparação por curso (se houver mais de um curso)
+    # Comparação por curso (se houver mais de um)
     if df["curso"].nunique() > 1:
         st.markdown("### 📚 Distribuição de Risco por Curso")
 
         curso_risco = (
-            df.groupby(["curso", "categoria_hibrida"]).size().reset_index(name="count")
+            df.groupby(["curso", "categoria_risco"]).size().reset_index(name="count")
         )
 
         fig_curso = px.bar(
             curso_risco,
             x="curso",
             y="count",
-            color="categoria_hibrida",
+            color="categoria_risco",
             title="Distribuição de Categorias de Risco por Curso",
             color_discrete_map={
                 "BAIXO": "#22c55e",
@@ -357,22 +370,72 @@ def show_admin_dashboard(engine):
 
     st.divider()
 
+    # ===== ANÁLISE DE CONCORDÂNCIA =====
+    st.markdown("## 🎯 Análise de Concordância (Modelo vs Resposta Real)")
+
+    # Criar tabela de concordância
+    concordancia = pd.crosstab(
+        df["pensou_evasao_real"],
+        df["prediction_label"],
+        rownames=["Real"],
+        colnames=["Predito"],
+        margins=True,
+    )
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.markdown("**Tabela de Concordância:**")
+        st.dataframe(concordancia, use_container_width=True)
+
+    with col2:
+        # Gráfico de concordância
+        df_temp = df.copy()
+        df_temp["real_label"] = df_temp["pensou_evasao_real"].map(
+            {0: "Não pensou", 1: "Pensou"}
+        )
+        df_temp["pred_label"] = df_temp["prediction_label"].map(
+            {0: "Não pensou", 1: "Pensou"}
+        )
+
+        concordancia_count = (
+            df_temp.groupby(["real_label", "pred_label"])
+            .size()
+            .reset_index(name="count")
+        )
+
+        fig_concordancia = px.bar(
+            concordancia_count,
+            x="real_label",
+            y="count",
+            color="pred_label",
+            title="Concordância: Real vs Predito",
+            barmode="group",
+            color_discrete_map={"Não pensou": "#22c55e", "Pensou": "#ef4444"},
+        )
+        st.plotly_chart(fig_concordancia, use_container_width=True)
+
+    st.divider()
+
     # ===== TABELA RESUMO COMPLETA =====
     st.markdown("## 📋 Tabela Resumo de Casos")
 
     # Criar tabela resumo
-    df_resumo = df[
-        [
-            "timestamp",
-            "curso",
-            "categoria_hibrida",
-            "prediction_score",
-            "identificacao_curso",
-            "mora_na_cidade",
-            "tem_filhos",
-            "horarios_trabalho",
-        ]
-    ].copy()
+    colunas_resumo = [
+        "timestamp",
+        "curso",
+        "categoria_risco",
+        "prediction_score",
+        "identificacao_curso",
+        "mora_na_cidade",
+        "tem_filhos",
+        "horarios_trabalho",
+    ]
+
+    # Verificar quais colunas existem no DataFrame
+    colunas_existentes = [col for col in colunas_resumo if col in df.columns]
+
+    df_resumo = df[colunas_existentes].copy()
 
     df_resumo["timestamp"] = pd.to_datetime(df_resumo["timestamp"]).dt.strftime(
         "%d/%m/%Y %H:%M"
@@ -380,21 +443,27 @@ def show_admin_dashboard(engine):
     df_resumo["prediction_score"] = df_resumo["prediction_score"].apply(
         lambda x: f"{x*100:.1f}%"
     )
+
+    # Renomear colunas
+    rename_dict = {
+        "timestamp": "Data/Hora",
+        "curso": "Curso",
+        "categoria_risco": "Categoria",
+        "prediction_score": "Score",
+        "identificacao_curso": "Identifica com Curso",
+        "mora_na_cidade": "Mora na Cidade",
+        "tem_filhos": "Tem Filhos",
+        "horarios_trabalho": "Horário Trabalho",
+    }
+
     df_resumo = df_resumo.rename(
-        columns={
-            "timestamp": "Data/Hora",
-            "curso": "Curso",
-            "categoria_hibrida": "Categoria",
-            "prediction_score": "Score",
-            "identificacao_curso": "Identifica com Curso",
-            "mora_na_cidade": "Mora na Cidade",
-            "tem_filhos": "Tem Filhos",
-            "horarios_trabalho": "Horário Trabalho",
-        }
+        columns={k: v for k, v in rename_dict.items() if k in df_resumo.columns}
     )
 
     # Aplicar cores na tabela
     def colorir_categoria(row):
+        if "Categoria" not in row:
+            return [""] * len(row)
         cores = {
             "BAIXO": "background-color: #d1fae5",
             "MODERADO": "background-color: #fef3c7",
@@ -413,25 +482,34 @@ def show_admin_dashboard(engine):
     st.divider()
 
     # ===== RELATÓRIOS =====
-    st.markdown("## 📄 Relatórios Institucionais")
+    st.markdown("## 📄 Relatórios e Exportação")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
         csv = df.to_csv(index=False)
         st.download_button(
             label="📥 Baixar Todos os Dados (CSV)",
             data=csv,
-            file_name=f"dados_hibrido_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            file_name=f"dados_completos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv",
         )
 
     with col2:
-        criticos_csv = df[df["prediction_score"] >= 0.75].to_csv(index=False)
+        criticos_csv = df[df["prediction_score"] >= 0.70].to_csv(index=False)
         st.download_button(
             label="🔴 Apenas Casos Críticos (CSV)",
             data=criticos_csv,
             file_name=f"casos_criticos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            mime="text/csv",
+        )
+
+    with col3:
+        alto_risco_csv = df[df["prediction_score"] >= 0.50].to_csv(index=False)
+        st.download_button(
+            label="🟠 Alto + Crítico (CSV)",
+            data=alto_risco_csv,
+            file_name=f"alto_risco_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv",
         )
 

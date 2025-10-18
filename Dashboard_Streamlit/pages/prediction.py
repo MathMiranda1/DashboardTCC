@@ -132,6 +132,14 @@ def preprocess_input(raw_data, model_data):
         return None
 
 
+def validar_e_mapear(valor, mapeamento, nome_campo):
+    """Valida se o valor não é vazio e retorna o mapeamento"""
+    if valor == "-- Selecione --":
+        st.error(f"❌ Campo '{nome_campo}' é obrigatório!")
+        st.stop()
+    return mapeamento[valor]
+
+
 def show_prediction_form(modelo_antigo, engine):
     """Formulário principal com predição usando modelo corrigido"""
 
@@ -160,6 +168,7 @@ def show_prediction_form(modelo_antigo, engine):
         col1, col2, col3 = st.columns(3)
         with col1:
             areas_cursos = {
+                "-- Selecione uma área --": "",
                 "Ciências Exatas e da Terra": "Ciência e Tecnologia",
                 "Engenharias": "Engenharia Civil",
                 "Ciências Humanas": "Pedagogia",
@@ -175,14 +184,18 @@ def show_prediction_form(modelo_antigo, engine):
         with col2:
             semestre_texto = st.text_input(
                 "Semestre de Ingresso *(informativo)*",
-                value="2025.1",
                 placeholder="Ex: 2025.1",
             )
 
         with col3:
             identificacao_curso = st.selectbox(
                 "**Você se identifica com o curso?**",
-                ("Sim", "Não, mas quero concluir", "Não, não sei se concluirei"),
+                (
+                    "-- Selecione --",
+                    "Sim",
+                    "Não, mas quero concluir",
+                    "Não, não sei se concluirei",
+                ),
             )
 
         # ===== SEÇÃO 2: TRANSPORTE =====
@@ -192,12 +205,13 @@ def show_prediction_form(modelo_antigo, engine):
         with col1:
             tipo_transporte = st.selectbox(
                 "**Como é seu deslocamento?**",
-                ["Carro", "Moto", "Ônibus", "A pé", "Outro"],
+                ["-- Selecione --", "Carro", "Moto", "Ônibus", "A pé", "Outro"],
             )
 
             propriedade = st.selectbox(
                 "**O transporte é:**",
                 [
+                    "-- Selecione --",
                     "Próprio",
                     "Cedido",
                     "Público(gratuito)",
@@ -209,12 +223,18 @@ def show_prediction_form(modelo_antigo, engine):
         with col2:
             barreira = st.selectbox(
                 "**O transporte é uma barreira?**",
-                ["Sim, sempre", "Sim, às vezes", "Não, mas já foi", "Não, nunca foi"],
+                [
+                    "-- Selecione --",
+                    "Sim, sempre",
+                    "Sim, às vezes",
+                    "Não, mas já foi",
+                    "Não, nunca foi",
+                ],
             )
 
             mora_cidade = st.selectbox(
                 "**Mora na cidade onde estuda?**",
-                ("Sim", "Não", "Durmo nos dias de aula"),
+                ("-- Selecione --", "Sim", "Não", "Durmo nos dias de aula"),
             )
 
         with col3:
@@ -225,7 +245,7 @@ def show_prediction_form(modelo_antigo, engine):
 
             acessibilidade = st.selectbox(
                 "**Acessibilidade do campus:**",
-                ("Adequada", "Inadequada"),
+                ("-- Selecione --", "Adequada", "Inadequada"),
             )
 
         # ===== SEÇÃO 3: EXPERIÊNCIAS NO CAMPUS =====
@@ -252,6 +272,7 @@ def show_prediction_form(modelo_antigo, engine):
         tempo_estudo = st.selectbox(
             "**Tempo para dedicar aos estudos:**",
             [
+                "-- Selecione --",
                 "É suficiente",
                 "É insuficiente, mas desempenho a maioria das atividades",
                 "É insuficiente, mas só realizo as atividades obrigatórias",
@@ -267,6 +288,7 @@ def show_prediction_form(modelo_antigo, engine):
             trabalha = st.selectbox(
                 "**Você trabalha?**",
                 [
+                    "-- Selecione --",
                     "Sim, empresa própria/autônomo",
                     "Sim, emprego formal",
                     "Sim, trabalho temporário",
@@ -281,6 +303,7 @@ def show_prediction_form(modelo_antigo, engine):
             horarios = st.selectbox(
                 "**Horários de trabalho:**",
                 [
+                    "-- Selecione --",
                     "Tempo integral ou dois turnos",
                     "Tempo parcial ou um turno",
                     "Horário corrido 6h",
@@ -292,22 +315,24 @@ def show_prediction_form(modelo_antigo, engine):
 
         with col3:
             estado_civil = st.selectbox(
-                "**Estado civil:**", ["Não casado", "Casado/união estável"]
+                "**Estado civil:**",
+                ["-- Selecione --", "Não casado", "Casado/união estável"],
             )
 
         col1, col2 = st.columns(2)
         with col1:
-            tem_filhos = st.selectbox("**Tem filhos?**", ["Não", "Sim"])
+            tem_filhos = st.selectbox(
+                "**Tem filhos?**", ["-- Selecione --", "Não", "Sim"]
+            )
             qtd_filhos = 0
             if tem_filhos == "Sim":
-                qtd_filhos = st.number_input(
-                    "Quantos?", min_value=1, max_value=10, value=1
-                )
+                qtd_filhos = st.number_input("Quantos?", min_value=1, max_value=10)
 
         with col2:
             contribuicao = st.selectbox(
                 "**Contribuição financeira familiar:**",
                 [
+                    "-- Selecione --",
                     "Sim, sou o único com renda",
                     "Sim, sou a principal",
                     "Sim, mas não sou o principal",
@@ -327,7 +352,7 @@ def show_prediction_form(modelo_antigo, engine):
 
         with col2:
             resposta_evasao = st.text_area(
-                "**🎯 Já pensou em trancar ou abandonar o curso? Por quê?**",
+                "**🎯 Já pensou em trancar ou abandonar o curso (SIM ou NÃO)? Por quê?**",
                 placeholder="Seja sincero(a)...",
                 help="Esta é a pergunta principal.",
             )
@@ -337,6 +362,40 @@ def show_prediction_form(modelo_antigo, engine):
     # ===== PROCESSAMENTO DA SUBMISSÃO =====
     if submit:
 
+        # VALIDAÇÃO DE CAMPOS OBRIGATÓRIOS
+        campos_obrigatorios = {
+            "Identificação com o curso": identificacao_curso,
+            "Tipo de transporte": tipo_transporte,
+            "Propriedade do transporte": propriedade,
+            "Barreira de transporte": barreira,
+            "Mora na cidade": mora_cidade,
+            "Acessibilidade": acessibilidade,
+            "Tempo para estudos": tempo_estudo,
+            "Situação de trabalho": trabalha,
+            "Horários de trabalho": horarios,
+            "Estado civil": estado_civil,
+            "Tem filhos": tem_filhos,
+            "Contribuição financeira": contribuicao,
+        }
+
+        campos_vazios = [
+            nome
+            for nome, valor in campos_obrigatorios.items()
+            if valor == "-- Selecione --"
+        ]
+
+        if campos_vazios:
+            st.error("❌ **Por favor, preencha os seguintes campos obrigatórios:**")
+            for campo in campos_vazios:
+                st.error(f"   • {campo}")
+            st.stop()
+
+        if not resposta_evasao.strip():
+            st.error(
+                "❌ **Por favor, responda à pergunta sobre pensamentos de evasão.**"
+            )
+            st.stop()
+
         # 1. CODIFICAR A RESPOSTA DE EVASÃO (ground truth)
         target_real = codificar_resposta_evasao(resposta_evasao)
         pensou_text = "SIM" if target_real == 1 else "NÃO"
@@ -344,76 +403,102 @@ def show_prediction_form(modelo_antigo, engine):
         # 2. PREPARAR FEATURES NUMÉRICAS
         # Mapeamentos exatos do treinamento
         dados_numericos = {
-            "Como é o seu deslocamento até a universidade?": {
-                "A pé": 0,
-                "Carro": 1,
-                "Moto": 2,
-                "Outro": 3,
-                "Ônibus": 4,
-            }[tipo_transporte],
-            "Com relação ao transporte do item anterior, ele é:": {
-                "Cedido": 0,
-                "Não se aplica": 1,
-                "Particular(táxi)": 2,
-                "Próprio": 3,
-                "Público(gratuito)": 4,
-            }[propriedade],
-            "O transporte representa uma barreira/dificuldade para frequentar a universidade?": {
-                "Não, mas já foi": 0,
-                "Não, nunca foi": 1,
-                "Sim, sempre": 2,
-                "Sim, às vezes": 3,
-            }[
-                barreira
-            ],
-            "Você mora em Angicos?": {
-                "Durmo nos dias de aula": 0,
-                "Não": 1,
-                "Sim": 2,
-            }[mora_cidade],
-            "Você se identifica com o curso que está fazendo?": {
-                "Não, mas quero concluir": 0,
-                "Não, não sei se concluirei": 1,
-                "Sim": 2,
-            }[identificacao_curso],
-            "Como você considera a acessibilidade do Campus?": {
-                "Adequada": 0,
-                "Inadequada": 1,
-            }[acessibilidade],
-            "Em relação ao tempo necessário como discente para dedicar no estudo?": {
-                "É insuficiente e não consigo realizar as atividades obrigatórias": 0,
-                "É insuficiente, mas desempenho a maioria das atividades": 1,
-                "É insuficiente, mas só realizo as atividades obrigatórias": 2,
-                "É suficiente": 3,
-            }[tempo_estudo],
-            "Você trabalha?": {
-                "Estágio remunerado": 0,
-                "Não trabalho": 1,
-                "Sim, emprego formal": 2,
-                "Sim, emprego informal": 3,
-                "Sim, trabalho temporário": 4,
-                "Sim, empresa própria/autônomo": 5,
-                "Sou bolsista": 6,
-            }[trabalha],
-            "Se você trabalha, em quais horários?": {
-                "Escala ou plantão": 0,
-                "Horário corrido 6h": 1,
-                "Não se aplica": 2,
-                "Sem horários fixos": 3,
-                "Tempo integral ou dois turnos": 4,
-                "Tempo parcial ou um turno": 5,
-            }[horarios],
-            "É casado(a)/está em união estável?": {
-                "Não casado": 0,
-                "Casado/união estável": 1,
-            }[estado_civil],
-            "Tem filhos?": {"Não": 0, "Sim": 1}[tem_filhos],
-            "Você contribui para o sustento financeiro da família?": {
-                "Não contribuo": 0,
-                "Sim, mas não sou o principal": 1,
-                "Sim, sou a principal": 2,
-                "Sim, sou o único com renda": 3,
-            }[contribuicao],
+            "Como é o seu deslocamento até a universidade?": validar_e_mapear(
+                tipo_transporte,
+                {"A pé": 0, "Carro": 1, "Moto": 2, "Outro": 3, "Ônibus": 4},
+                "Tipo de transporte",
+            ),
+            "Com relação ao transporte do item anterior, ele é:": validar_e_mapear(
+                propriedade,
+                {
+                    "Cedido": 0,
+                    "Não se aplica": 1,
+                    "Particular(táxi)": 2,
+                    "Próprio": 3,
+                    "Público(gratuito)": 4,
+                },
+                "Propriedade do transporte",
+            ),
+            "O transporte representa uma barreira/dificuldade para frequentar a universidade?": validar_e_mapear(
+                barreira,
+                {
+                    "Não, mas já foi": 0,
+                    "Não, nunca foi": 1,
+                    "Sim, sempre": 2,
+                    "Sim, às vezes": 3,
+                },
+                "Barreira de transporte",
+            ),
+            "Você mora em Angicos?": validar_e_mapear(
+                mora_cidade,
+                {"Durmo nos dias de aula": 0, "Não": 1, "Sim": 2},
+                "Mora na cidade",
+            ),
+            "Você se identifica com o curso que está fazendo?": validar_e_mapear(
+                identificacao_curso,
+                {
+                    "Não, mas quero concluir": 0,
+                    "Não, não sei se concluirei": 1,
+                    "Sim": 2,
+                },
+                "Identificação com o curso",
+            ),
+            "Como você considera a acessibilidade do Campus?": validar_e_mapear(
+                acessibilidade, {"Adequada": 0, "Inadequada": 1}, "Acessibilidade"
+            ),
+            "Em relação ao tempo necessário como discente para dedicar no estudo?": validar_e_mapear(
+                tempo_estudo,
+                {
+                    "É insuficiente e não consigo realizar as atividades obrigatórias": 0,
+                    "É insuficiente, mas desempenho a maioria das atividades": 1,
+                    "É insuficiente, mas só realizo as atividades obrigatórias": 2,
+                    "É suficiente": 3,
+                },
+                "Tempo para estudos",
+            ),
+            "Você trabalha?": validar_e_mapear(
+                trabalha,
+                {
+                    "Estágio remunerado": 0,
+                    "Não trabalho": 1,
+                    "Sim, emprego formal": 2,
+                    "Sim, emprego informal": 3,
+                    "Sim, trabalho temporário": 4,
+                    "Sim, empresa própria/autônomo": 5,
+                    "Sou bolsista": 6,
+                },
+                "Situação de trabalho",
+            ),
+            "Se você trabalha, em quais horários?": validar_e_mapear(
+                horarios,
+                {
+                    "Escala ou plantão": 0,
+                    "Horário corrido 6h": 1,
+                    "Não se aplica": 2,
+                    "Sem horários fixos": 3,
+                    "Tempo integral ou dois turnos": 4,
+                    "Tempo parcial ou um turno": 5,
+                },
+                "Horários de trabalho",
+            ),
+            "É casado(a)/está em união estável?": validar_e_mapear(
+                estado_civil,
+                {"Não casado": 0, "Casado/união estável": 1},
+                "Estado civil",
+            ),
+            "Tem filhos?": validar_e_mapear(
+                tem_filhos, {"Não": 0, "Sim": 1}, "Tem filhos"
+            ),
+            "Você contribui para o sustento financeiro da família?": validar_e_mapear(
+                contribuicao,
+                {
+                    "Não contribuo": 0,
+                    "Sim, mas não sou o principal": 1,
+                    "Sim, sou a principal": 2,
+                    "Sim, sou o único com renda": 3,
+                },
+                "Contribuição financeira",
+            ),
             "Você sofreu algum tipo de preconceito ou violência durante o curso relativo a:_Aparência": int(
                 prec_aparencia and not prec_nao
             ),
