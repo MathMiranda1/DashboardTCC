@@ -1,21 +1,33 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 
+# Importando as funções do database.py que está na raiz
+from database import get_connection, init_users_db, get_users_credentials
+
 
 def setup_admin_auth():
-    """Configura autenticação para administradores"""
-    names = ["Administrador"]
-    usernames = ["admin"]
-    passwords = ["admin456"]
+    """Configura autenticação para administradores usando o Banco de Dados"""
 
-    hashed_passwords = stauth.Hasher(passwords).generate()
+    # 1. Conectar ao banco
+    engine = get_connection()
 
-    credentials = {"usernames": {}}
-    for username, name, hash_password in zip(usernames, names, hashed_passwords):
-        credentials["usernames"][username] = {"name": name, "password": hash_password}
+    if engine is None:
+        st.error("Falha na conexão com o banco de dados para autenticação.")
+        # Retorna None para tratar o erro posteriormente
+        return None
 
+    # 2. Inicializar a tabela de usuários (cria admin padrão se necessário)
+    init_users_db(engine)
+
+    # 3. Buscar credenciais do banco (substitui o hardcode antigo)
+    credentials = get_users_credentials(engine)
+
+    # 4. Retornar o objeto autenticador
     return stauth.Authenticate(
-        credentials, "evasao_admin", "admin_key_12345", cookie_expiry_days=30
+        credentials,
+        "evasao_admin_cookie",
+        "admin_key_secure_123",
+        cookie_expiry_days=30,
     )
 
 
@@ -23,10 +35,16 @@ def show_admin_login():
     """Tela de login administrativo"""
     st.markdown("## 🔐 Acesso Administrativo")
 
+    # Limpa status anterior se houver inconsistência
     if st.session_state.get("authentication_status") == True:
         st.session_state.authentication_status = None
 
     authenticator = setup_admin_auth()
+
+    # Se o banco falhou, para a execução aqui
+    if authenticator is None:
+        st.stop()
+
     name, authentication_status, username = authenticator.login("Login", "main")
 
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -39,7 +57,8 @@ def show_admin_login():
         st.error("❌ Usuário/senha incorretos")
     elif authentication_status == None:
         st.info("👋 Digite suas credenciais administrativas")
-        st.markdown("**Credenciais:** admin / admin456")
+        # Removido o texto hardcoded da senha por segurança.
+        # Na primeira vez, use: admin / admin456
     else:
         st.session_state.user_type = "admin"
         st.session_state.authentication_status = True
@@ -52,9 +71,10 @@ def safe_logout():
     """Função de logout segura que não gera erro de cookie"""
     try:
         authenticator = setup_admin_auth()
-        authenticator.logout("Logout", "main")
+        if authenticator:
+            authenticator.logout("Logout", "main")
     except (KeyError, AttributeError):
-        # Se der erro no logout do cookie, apenas limpar o session state
+        # Se der erro no logout do cookie, apenas passamos
         pass
 
     # Sempre limpar o session state independentemente do cookie

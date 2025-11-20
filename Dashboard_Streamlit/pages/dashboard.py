@@ -422,6 +422,7 @@ def show_admin_dashboard(engine):
 
     # Criar tabela resumo
     colunas_resumo = [
+        "id",
         "timestamp",
         "curso",
         "categoria_risco",
@@ -437,47 +438,105 @@ def show_admin_dashboard(engine):
 
     df_resumo = df[colunas_existentes].copy()
 
-    df_resumo["timestamp"] = pd.to_datetime(df_resumo["timestamp"]).dt.strftime(
-        "%d/%m/%Y %H:%M"
-    )
-    df_resumo["prediction_score"] = df_resumo["prediction_score"].apply(
-        lambda x: f"{x*100:.1f}%"
-    )
+    # Só formatar se não estiver vazio
+    if not df_resumo.empty:
+        df_resumo["timestamp"] = pd.to_datetime(df_resumo["timestamp"]).dt.strftime(
+            "%d/%m/%Y %H:%M"
+        )
+        df_resumo["prediction_score"] = df_resumo["prediction_score"].apply(
+            lambda x: f"{x*100:.1f}%"
+        )
 
-    # Renomear colunas
-    rename_dict = {
-        "timestamp": "Data/Hora",
-        "curso": "Curso",
-        "categoria_risco": "Categoria",
-        "prediction_score": "Score",
-        "identificacao_curso": "Identifica com Curso",
-        "mora_na_cidade": "Mora na Cidade",
-        "tem_filhos": "Tem Filhos",
-        "horarios_trabalho": "Horário Trabalho",
-    }
-
-    df_resumo = df_resumo.rename(
-        columns={k: v for k, v in rename_dict.items() if k in df_resumo.columns}
-    )
-
-    # Aplicar cores na tabela
-    def colorir_categoria(row):
-        if "Categoria" not in row:
-            return [""] * len(row)
-        cores = {
-            "BAIXO": "background-color: #d1fae5",
-            "MODERADO": "background-color: #fef3c7",
-            "ALTO": "background-color: #fed7aa",
-            "CRÍTICO": "background-color: #fee2e2",
+        # Renomear colunas
+        rename_dict = {
+            "id": "ID",
+            "timestamp": "Data/Hora",
+            "curso": "Curso",
+            "categoria_risco": "Categoria",
+            "prediction_score": "Score",
+            "identificacao_curso": "Identifica com Curso",
+            "mora_na_cidade": "Mora na Cidade",
+            "tem_filhos": "Tem Filhos",
+            "horarios_trabalho": "Horário Trabalho",
         }
-        cor = cores.get(row["Categoria"], "")
-        return [cor] * len(row)
 
-    st.dataframe(
-        df_resumo.style.apply(colorir_categoria, axis=1),
-        use_container_width=True,
-        height=400,
-    )
+        df_resumo = df_resumo.rename(
+            columns={k: v for k, v in rename_dict.items() if k in df_resumo.columns}
+        )
+
+        # ⭐ NOVA FUNCIONALIDADE: SELEÇÃO INTERATIVA
+        st.info("💡 **Clique em uma linha da tabela abaixo para ver detalhes do caso**")
+
+        evento = st.dataframe(
+            df_resumo,
+            use_container_width=True,
+            height=400,
+            on_select="rerun",
+            selection_mode="single-row",
+        )
+
+        # ⭐ MOSTRAR DETALHES QUANDO LINHA FOR SELECIONADA
+        if evento.selection.rows:
+            linha_selecionada = evento.selection.rows[0]
+            caso_id = df_resumo.iloc[linha_selecionada]["ID"]
+
+            # Buscar dados completos do caso
+            caso_completo = df[df["id"] == caso_id].iloc[0]
+
+            st.markdown("---")
+            st.markdown(f"## 🔍 **Detalhes do Caso #{caso_id}**")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("### 📌 Ações Recomendadas")
+                acoes = caso_completo.get("acoes_recomendadas", "Não disponível")
+
+                # Dividir ações por ponto e vírgula se estiver concatenado
+                if ";" in str(acoes):
+                    for acao in acoes.split(";"):
+                        st.write(f"• {acao.strip()}")
+                else:
+                    st.write(f"• {acoes}")
+
+            with col2:
+                st.markdown("### 🔍 Fatores de Risco")
+                fatores = caso_completo.get(
+                    "fatores_risco", "Nenhum fator identificado"
+                )
+
+                # Dividir fatores por ponto e vírgula
+                if ";" in str(fatores):
+                    for fator in fatores.split(";"):
+                        st.write(f"• {fator.strip()}")
+                else:
+                    st.write(f"• {fatores}")
+
+            # Informações adicionais
+            st.markdown("### 📄 Informações do Caso")
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.metric(
+                    "Score de Risco", f"{caso_completo['prediction_score']*100:.1f}%"
+                )
+            with col2:
+                st.metric("Categoria", caso_completo.get("categoria_risco", "N/A"))
+            with col3:
+                real_label = (
+                    "Pensou em evasão"
+                    if caso_completo.get("pensou_evasao_real", 0) == 1
+                    else "Não pensou"
+                )
+                st.metric("Resposta Real", real_label)
+
+            # Resposta completa se disponível
+            if caso_completo.get("resposta_completa_evasao"):
+                with st.expander("📝 Ver resposta completa sobre evasão"):
+                    st.write(caso_completo["resposta_completa_evasao"])
+
+    else:
+        st.warning("📊 Ainda não há dados para exibir na tabela.")
 
     st.divider()
 

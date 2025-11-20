@@ -319,14 +319,20 @@ def show_prediction_form(modelo_antigo, engine):
                 ["-- Selecione --", "Não casado", "Casado/união estável"],
             )
 
-        col1, col2 = st.columns(2)
         with col1:
             tem_filhos = st.selectbox(
                 "**Tem filhos?**", ["-- Selecione --", "Não", "Sim"]
             )
-            qtd_filhos = 0
-            if tem_filhos == "Sim":
-                qtd_filhos = st.number_input("Quantos?", min_value=1, max_value=10)
+
+            if tem_filhos != "Não":  # Mostra só se não for "Não"
+                qtd_filhos = st.number_input(
+                    "**Quantos filhos?**",
+                    min_value=1 if tem_filhos == "Sim" else 0,
+                    max_value=10,
+                    value=0,
+                )
+            else:
+                qtd_filhos = 0
 
         with col2:
             contribuicao = st.selectbox(
@@ -544,6 +550,54 @@ def show_prediction_form(modelo_antigo, engine):
                     1
                 ]  # Usar a probabilidade da CLASSE 1
                 predicao = 1 if probabilidade_evasao > 0.5 else 0
+
+                # 🔥 CALCULAR FATORES DE RISCO E AÇÕES (PARA SALVAR NO BANCO)
+                fatores = []
+                if barreira in ["Sim, sempre", "Sim, às vezes"]:
+                    fatores.append("Dificuldades de transporte")
+                if identificacao_curso != "Sim":
+                    fatores.append("Baixa identificação com o curso")
+                if "insuficiente" in tempo_estudo.lower():
+                    fatores.append("Tempo insuficiente para estudos")
+                if trabalha in ["Sim, emprego formal", "Sim, empresa própria/autônomo"]:
+                    fatores.append("Trabalho pode interferir nos estudos")
+                if horarios == "Tempo integral ou dois turnos":
+                    fatores.append("Trabalho em período integral")
+                if tem_filhos == "Sim":
+                    fatores.append("Responsabilidades familiares")
+                if any([prec_cor, prec_financeiro, prec_aparencia, prec_deficiencia]):
+                    fatores.append("Experiência de preconceito/violência")
+                if contribuicao in [
+                    "Sim, sou o único com renda",
+                    "Sim, sou a principal",
+                ]:
+                    fatores.append("Responsabilidade financeira familiar")
+
+                fatores_texto = (
+                    "; ".join(fatores)
+                    if fatores
+                    else "Nenhum fator específico identificado"
+                )
+
+                # Ações recomendadas
+                if probabilidade_evasao > 0.5:
+                    acoes = "Intervenção Imediata: Contato proativo com o estudante; Análise das dificuldades específicas; Encaminhamento para suporte; Verificação de auxílios disponíveis"
+                else:
+                    acoes = "Acompanhamento Preventivo: Monitoramento regular; Incentivo à participação em atividades; Canal de comunicação aberto"
+
+                # Categoria de risco
+                def classificar_risco(score):
+                    if score < 0.30:
+                        return "BAIXO"
+                    elif score < 0.50:
+                        return "MODERADO"
+                    elif score < 0.70:
+                        return "ALTO"
+                    else:
+                        return "CRÍTICO"
+
+                categoria = classificar_risco(probabilidade_evasao)
+
                 # 5. SALVAR NO BANCO
                 data_to_save = pd.DataFrame(
                     [
@@ -551,6 +605,7 @@ def show_prediction_form(modelo_antigo, engine):
                             "timestamp": datetime.now(),
                             "user_submitting": st.session_state.get("username", "anon"),
                             "curso": curso,
+                            "semestre_ingresso": semestre_texto,
                             "tipo_transporte": tipo_transporte,
                             "propriedade_transporte": propriedade,
                             "barreira_transporte": barreira,
@@ -578,6 +633,9 @@ def show_prediction_form(modelo_antigo, engine):
                             "pensou_evasao_real": int(target_real),
                             "prediction_label": int(predicao),
                             "prediction_score": float(probabilidade_evasao),
+                            "fatores_risco": fatores_texto,
+                            "acoes_recomendadas": acoes,
+                            "categoria_risco": categoria,
                         }
                     ]
                 )

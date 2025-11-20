@@ -1849,3 +1849,148 @@ The DataFrame has column names of mixed type. They will be converted to strings 
 The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
 
 
+2025-11-20 13:37:13,086:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:37:13,086:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:37:13,086:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:37:13,086:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:37:13,838:INFO:Initializing load_model()
+2025-11-20 13:37:13,838:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 13:51:32,034:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:51:32,034:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:51:32,034:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:51:32,035:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 13:51:32,447:INFO:Initializing load_model()
+2025-11-20 13:51:32,447:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 13:52:10,296:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 13:52:19,421:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 13:52:50,759:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 13:52:59,789:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 14:11:52,858:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 14:45:03,519:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:45:03,519:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:45:03,519:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:45:03,519:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:45:04,290:INFO:Initializing load_model()
+2025-11-20 14:45:04,290:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 14:45:08,327:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 14:45:23,286:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 14:45:40,355:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 14:50:54,173:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:50:54,173:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:50:54,173:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:50:54,173:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 14:50:54,643:INFO:Initializing load_model()
+2025-11-20 14:50:54,643:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 14:50:59,118:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 14:51:19,761:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 14:51:53,936:WARNING:/home/matheus/Desktop/DashboardTCC/venv/lib64/python3.11/site-packages/streamlit/dataframe_util.py:831: UserWarning:
+
+The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+
+
+2025-11-20 15:08:55,240:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:08:55,240:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:08:55,240:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:08:55,240:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:08:55,929:INFO:Initializing load_model()
+2025-11-20 15:08:55,929:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 15:10:16,441:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:10:16,441:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:10:16,441:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:10:16,441:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:10:16,900:INFO:Initializing load_model()
+2025-11-20 15:10:16,900:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 15:11:01,045:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:11:01,045:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:11:01,045:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:11:01,045:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:11:01,521:INFO:Initializing load_model()
+2025-11-20 15:11:01,521:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 15:12:38,868:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:12:38,868:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:12:38,868:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:12:38,868:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:12:39,325:INFO:Initializing load_model()
+2025-11-20 15:12:39,325:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
+2025-11-20 15:13:55,433:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:13:55,433:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:13:55,433:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:13:55,433:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2025-11-20 15:13:55,898:INFO:Initializing load_model()
+2025-11-20 15:13:55,898:INFO:load_model(model_name=../models/modelo_evasao, platform=None, authentication=None, verbose=True)
